@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">The Money Logs</string>
+    <string name="title_item_detail">Item Detail</string>
+    <string name="lbl_add_xaction">Add a transaction</string>
+    <string name="category">Category</string>
+    <string name="notes_description">Previous notes about this transaction</string>
+    <string name="amount">Amount</string>
+    <string name="category_widget_hint">Choose or type the category</string>
+    <string name="payee_payor">Payee/Payor</string>
+    <string name="lbl_planned">Planned:</string>
+    <string name="lbl_actual">Actual:</string>
+    <string name="lbl_remaining">Outstanding:</string>
+    <string name="lbl_planned_date">Due By</string>
+    <string name="lbl_planned_amount">Planned Amount</string>
+    <string name="lbl_actual_date">Date Paid</string>
+    <string name="lbl_actual_amount">Amount Paid</string>
+    <string name="set_date">Set Date</string>
+    <string name="lbl_set_date_paid">Set or change the date paid</string>
+    <string name="lbl_set_due_date">Set or change the due date</string>
+</resources>
