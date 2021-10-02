@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
@@ -34,7 +35,7 @@ import kotlin.collections.ArrayList
  * item details side-by-side using two vertical panes.
  */
 
-class ItemListFragment : Fragment(), Observer<ArrayList<TxnWithCategory>> {
+class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
     private var txns_ready: Boolean = false
     private var categories_ready: Boolean = false
     private var just_started: Boolean = true
@@ -64,7 +65,7 @@ class ItemListFragment : Fragment(), Observer<ArrayList<TxnWithCategory>> {
         false
     }
 
-    private val model: ItemViewModel by activityViewModels()
+    private val model: TxnListViewModel by viewModels()
 
     private var _binding: FragmentItemListBinding? = null
 
@@ -82,7 +83,8 @@ class ItemListFragment : Fragment(), Observer<ArrayList<TxnWithCategory>> {
         model.loadTxns()
         model.txnList.observe(viewLifecycleOwner,TxnListHelper(this))
         */
-        model.txnExtraList.observe(viewLifecycleOwner,this)
+
+        model.txnList.observe(viewLifecycleOwner,this)
         _binding = FragmentItemListBinding.inflate(inflater, container, false)
         return binding.root
 
@@ -104,7 +106,7 @@ class ItemListFragment : Fragment(), Observer<ArrayList<TxnWithCategory>> {
          */
         val onClickListener = View.OnClickListener { itemView ->
             val item = itemView.tag as TxnWithCategory
-            model.select(item)
+           // model.select(item)
             val bundle = Bundle()
             /*
             bundle.putInt(
@@ -143,16 +145,14 @@ class ItemListFragment : Fragment(), Observer<ArrayList<TxnWithCategory>> {
     ) {
 
         recyclerView.adapter = SimpleItemRecyclerViewAdapter(
-            model.txnExtraList.value!!,
-            model.categoryList.value!!,
+            model.txnList.value!!,
             onClickListener,
             onContextClickListener
         )
     }
 
     class SimpleItemRecyclerViewAdapter(
-        private val values: ArrayList<TxnWithCategory>,
-        private val categories: List<Category>,
+        private val values: List<TxnWithCategory>,
         private val onClickListener: View.OnClickListener,
         private val onContextClickListener: View.OnContextClickListener
     ) :
@@ -232,7 +232,7 @@ class ItemListFragment : Fragment(), Observer<ArrayList<TxnWithCategory>> {
        // (binding.itemList.adapter as SimpleItemRecyclerViewAdapter).da
         val onClickListener = View.OnClickListener { itemView ->
             val item = itemView.tag as TxnWithCategory
-            model.select(item)
+           // model.select(item)
             val bundle = Bundle()
             /*
             bundle.putInt(
@@ -253,7 +253,7 @@ class ItemListFragment : Fragment(), Observer<ArrayList<TxnWithCategory>> {
     }
 
 
-    override fun onChanged(t: ArrayList<TxnWithCategory>?) {
+    override fun onChanged(t: List<TxnWithCategory>?) {
         showList()
     }
 

@@ -20,5 +20,5 @@ interface PlannedTxnDao {
     fun getAllTxns(): List<PlannedTxn>
 
     @Query("SELECT * FROM planned")
-    fun getAllTxnsWithCategory(): List<TxnWithCategory>
+    fun getAllTxnsWithCategory(): Flow<List<TxnWithCategory>>
 }

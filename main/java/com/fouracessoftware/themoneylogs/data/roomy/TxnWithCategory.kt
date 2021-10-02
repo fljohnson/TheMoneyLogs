@@ -1,11 +1,13 @@
 package com.fouracessoftware.themoneylogs.data.roomy
 
+import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import androidx.room.ColumnInfo
 
 
 import androidx.room.Embedded
 import androidx.room.Relation
+import java.util.*
 
 data class TxnWithCategory(
     @Embedded
@@ -30,8 +32,13 @@ data class TxnWithCategory(
         {
             return "[Undated]"
         }
-        return "${txn.dateDue.get(Calendar.YEAR)}-${1+txn.dateDue.get(Calendar.MONTH)}-${txn.dateDue.get(Calendar.DATE)}"
+        return dateFormat.format(txn.dateDue)
 
+    }
+
+
+    companion object {
+        private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     }
 }
 

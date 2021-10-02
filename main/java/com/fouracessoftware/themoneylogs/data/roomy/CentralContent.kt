@@ -31,6 +31,7 @@ object CentralContent  {
     }
 
     fun engage() {
+        /*
         CoroutineScope(Dispatchers.IO).launch{
             while(!categoriesReady){
 
@@ -45,6 +46,7 @@ object CentralContent  {
             //TODO:fetch txns
 
         }
+        */
 
         CoroutineScope(Dispatchers.IO).launch{
 
@@ -61,7 +63,7 @@ object CentralContent  {
             categoryDao.insertCategory(Category(name = "Entertainment", openEnded = true,description = "food out, movies, events, museums"))
             getCategories()
             categoriesReady = true
-
+            sproing()
 
 
         }

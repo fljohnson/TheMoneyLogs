@@ -1,5 +1,6 @@
 package com.fouracessoftware.themoneylogs
 
+import android.icu.text.SimpleDateFormat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.fouracessoftware.themoneylogs.data.PrototypeContent
@@ -11,6 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.util.*
 import kotlin.collections.ArrayList
 
 class ItemViewModel: ViewModel() {
@@ -63,7 +65,7 @@ class ItemViewModel: ViewModel() {
     fun loadTxnsExtra() {
         CoroutineScope(Dispatchers.IO).launch {
             txnExtraList.value!!.clear()
-            txnExtraList.value!!.addAll(CentralContent.plannedTxnDao.getAllTxnsWithCategory())
+           // txnExtraList.value!!.addAll(CentralContent.plannedTxnDao.getAllTxnsWithCategory())
 
             if(! txnExtraList.value!!.isEmpty())
             {
@@ -88,6 +90,10 @@ class ItemViewModel: ViewModel() {
             loadCategories()
             loadTxns()*/
         }
+    }
+
+    companion object {
+        private val dateFormat = SimpleDateFormat("mm/dd/yyyy", Locale.US)
     }
 
 }
