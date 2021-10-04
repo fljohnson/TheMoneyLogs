@@ -9,7 +9,7 @@ import com.fouracessoftware.themoneylogs.data.roomy.CentralContent
 import com.fouracessoftware.themoneylogs.data.roomy.TxnWithCategory
 
 class TxnListViewModel: ViewModel() {
-    val selected = MutableLiveData<TxnWithCategory>()
+    private val selected = MutableLiveData<TxnWithCategory>()
     fun select(item: TxnWithCategory) {
         selected.value = item
     }

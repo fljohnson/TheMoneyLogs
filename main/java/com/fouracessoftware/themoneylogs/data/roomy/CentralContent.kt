@@ -3,26 +3,22 @@ package com.fouracessoftware.themoneylogs.data.roomy
 
 
 import android.icu.util.Calendar
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import com.fouracessoftware.themoneylogs.MainApplication
 import com.fouracessoftware.themoneylogs.data.PrototypeContent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.util.logging.ConsoleHandler
 
 object CentralContent  {
 
-    var ouch: LifecycleOwner? = null
     private var categoires = ArrayList<Category>(0)
-    private var informant = MutableLiveData<ArrayList<Category>>();
+    private var informant = MutableLiveData<ArrayList<Category>>()
     var plannedTxnDao: PlannedTxnDao
     var categoryDao:CategoryDao
-    private var categoriesReady = false;
-    private var plannedsReady = false;
+    private var categoriesReady = false
+    private var plannedsReady = false
 
     init{
         informant.value = categoires
@@ -31,22 +27,7 @@ object CentralContent  {
     }
 
     fun engage() {
-        /*
-        CoroutineScope(Dispatchers.IO).launch{
-            while(!categoriesReady){
 
-            }
-            sproing()
-
-        }
-        CoroutineScope(Dispatchers.IO).launch{
-            while(!plannedsReady){
-
-            }
-            //TODO:fetch txns
-
-        }
-        */
 
         CoroutineScope(Dispatchers.IO).launch{
 
@@ -70,13 +51,13 @@ object CentralContent  {
 
     }
 
-    suspend fun insertPlanned(incoming:MutableMap<String,String>) {
+    private fun insertPlanned(incoming:MutableMap<String,String>) {
         var category:Category? = null
         println("Grrr "+ categoires.size)
         for(c in categoires){
             if(c.name.contentEquals(incoming["Category"])){
-                category = c;
-                break;
+                category = c
+                break
             }
         }
 
@@ -94,26 +75,21 @@ object CentralContent  {
         val txn = PlannedTxn(amount = PrototypeContent.safeExtract(incoming["Amount"]),
             dateDue = duedate,
             payee = incoming["Payee"]!!,
-            categoryId = category!!.categoryId
+            categoryId = category.categoryId
         )
        plannedTxnDao.insertTxnWithCategory(txn,category)
 
     }
-    suspend fun getCategories() {
+    private suspend fun getCategories() {
 
-
-      //  CoroutineScope(Dispatchers.IO).launch{
-          //  rv = categoryDao.getAllCategories().first()
             categoires.addAll(categoryDao.getAllCategories().first())
-      //  }
-       // return rv
     }
 
-    fun getCalendarFor(ymd:String):Calendar {
+    private fun getCalendarFor(ymd:String):Calendar {
         val rv=Calendar.getInstance()
 
-        var div1 = ymd.indexOf("-")
-        var div2 = ymd.lastIndexOf("-")
+        val div1 = ymd.indexOf("-")
+        val div2 = ymd.lastIndexOf("-")
         val yr = ymd.substring(0,div1).toInt()
         val mo = ymd.substring(div1+1,div2).toInt() - 1
         val da =ymd.substring(div2+1).toInt()
@@ -121,9 +97,9 @@ object CentralContent  {
         return rv
     }
 
-    suspend fun sproing() {
+    fun sproing() {
 
-     //  CoroutineScope(Dispatchers.IO).launch {
+
             insertPlanned(
                 mutableMapOf(
                     "Date" to "2021-09-03",
@@ -280,11 +256,9 @@ object CentralContent  {
                     "Payee" to "Doctor visit"
                 )
             )
-       //}
+
         plannedsReady = true
     }
 
-    fun ready(): Boolean = categoriesReady && plannedsReady
-    //Holy (expletive) that was clever
 
 }

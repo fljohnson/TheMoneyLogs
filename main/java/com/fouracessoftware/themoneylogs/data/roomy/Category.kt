@@ -1,9 +1,8 @@
 package com.fouracessoftware.themoneylogs.data.roomy
 
 import androidx.room.*
-import androidx.room.ForeignKey.CASCADE
 
-@Entity(indices = arrayOf(Index(value = ["name"],unique = true))
+@Entity(indices = [Index(value = ["name"],unique = true)]
 
 
 

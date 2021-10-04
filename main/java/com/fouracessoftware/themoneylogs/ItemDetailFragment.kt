@@ -1,11 +1,8 @@
 package com.fouracessoftware.themoneylogs
 
-import android.content.ClipData
 import android.content.Context
 import android.icu.util.Calendar
 import android.os.Bundle
-import android.text.Editable
-import android.view.DragEvent
 import androidx.fragment.app.Fragment
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import android.view.LayoutInflater
@@ -14,10 +11,8 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.TextView
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import com.fouracessoftware.themoneylogs.data.PrototypeContent
 import com.fouracessoftware.themoneylogs.data.roomy.Category
 import com.fouracessoftware.themoneylogs.data.roomy.TxnWithCategory
 import com.fouracessoftware.themoneylogs.databinding.FragmentItemDetailBinding
@@ -51,59 +46,24 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
     // onDestroyView.
     private val binding get() = _binding!!
 
-    /* TODO remove
-    private val dragListener = View.OnDragListener { _, event ->
-        if (event.action == DragEvent.ACTION_DROP) {
-            val clipDataItem: ClipData.Item = event.clipData.getItemAt(0)
-            val dragData = clipDataItem.text
-         //   item = PrototypeContent.items[dragData.toString().toInt()]
-            updateContent()
-        }
-        true
-    }
-    */
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        /*
-        item = model.selected.value
-        model.selected.observe(viewLifecycleOwner, { selected_item ->
-            item = selected_item
-            // Update the UI
-            updateContent()
-        })*/
+
 
         arguments?.let {
             if (it.containsKey(ARG_ITEM_ID)) {
                 // Load the placeholder content specified by the fragment
                 // arguments. In a real-world scenario, use a Loader
                 // to load content from a content provider.
-                model.getTxn(it.getLong(ARG_ITEM_ID)).observe(viewLifecycleOwner,Observer{
+                model.getTxn(it.getLong(ARG_ITEM_ID)).observe(viewLifecycleOwner, {
                         selected_item -> item = selected_item
                     // Update the UI
                     updateContent()
                 })
             }
         }
-
-    }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-/*
-        arguments?.let {
-            if (it.containsKey(ARG_ITEM_ID)) {
-                // Load the placeholder content specified by the fragment
-                // arguments. In a real-world scenario, use a Loader
-                // to load content from a content provider.
-                model.getTxn(it.getLong(ARG_ITEM_ID)).observe(viewLifecycleOwner,Observer{
-                    selected_item -> item = selected_item
-                    // Update the UI
-                    updateContent()
-                })
-            }
-        }*/
 
     }
 
@@ -167,7 +127,7 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
         binding.plannedDate?.setOnClickListener(dateBtnListener)
         binding.actualDate?.setOnClickListener(dateBtnListener)
         updateContent()
-        //rootView.setOnDragListener(dragListener)
+
 
         return rootView
     }
@@ -178,9 +138,9 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
         // Show the placeholder content as text in a TextView.
         item?.let {
            // itemDetailTextView.text = it.getNotes() TODO
-            var toShow = it.amount().toString()
-            var fullAmt = it.amount()
-            var remainingAmt = it.getOutstandingAmount()
+            val fullAmt = it.amount()
+            var toShow = fullAmt.toString()
+            val remainingAmt = it.getOutstandingAmount()
             if(remainingAmt <0f) {
                 /* TODO once the actuals data structure exists
                 toShow = (it.getTotalPaid())
@@ -215,22 +175,9 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
         _binding = null
     }
 
-    fun onPlannedDateClick() {
-
-    }
-    fun onActualDateClick() {
-
-    }
 
     override fun onChanged(t: List<Category>?) {
-        /*
-        categoryList.clear()
-        categoryList.addAll(t!!)
-        val items = ArrayList<String>() //model.categoryList.value!!
-        for(c in categoryList!!){
-            items.add(c.name)
-        }
-        */
+
         val adapter = CategoryAdapter(requireContext(), R.layout.category_menu_item,model.categoryList.value)
 
         (binding.categoryMenu!!.editText as? AutoCompleteTextView)?.setAdapter(adapter)
@@ -239,12 +186,10 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
 
     class CategoryAdapter(
         context: Context,
-        resource: Int,
-        //objects: List<String>,
+        private val resource: Int,
         categoryList: List<Category>?
     ) :
         ArrayAdapter<Category>(context, resource, categoryList!!) {
-        private val resource:Int = resource
         override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
             var theView = convertView
             if(theView == null) {
@@ -253,13 +198,7 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
             }
             //"if content == null, return theView" (FLJ, 10/3/2021)
             val content = getItem(position) ?: return theView!!
-            /*
-            if(categoryList == null)
-                return theView!!
-            val suspect = categoryList[position]
-            if(!.description.isNullOrEmpty())
 
-             */
 
             var labelText = content.name
             if(!content.description.isNullOrEmpty())

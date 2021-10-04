@@ -12,19 +12,14 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.fouracessoftware.themoneylogs.data.PrototypeContent
-import com.fouracessoftware.themoneylogs.data.roomy.Category
-import com.fouracessoftware.themoneylogs.data.roomy.PlannedTxn
 import com.fouracessoftware.themoneylogs.data.roomy.TxnWithCategory
 import com.fouracessoftware.themoneylogs.databinding.FragmentItemListBinding
 import com.fouracessoftware.themoneylogs.databinding.ItemListContentBinding
-import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * A Fragment representing a list of Pings. This fragment
@@ -38,9 +33,6 @@ import kotlin.collections.ArrayList
 class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
     private lateinit var storedItemOnClickListener: View.OnClickListener
     private lateinit var storedOnContextClickListener:View.OnContextClickListener
-    private var txns_ready: Boolean = false
-    private var categories_ready: Boolean = false
-    private var just_started: Boolean = true
 
     /**
      * Method to intercept global key events in the
@@ -55,14 +47,14 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
                     "Undo (Ctrl + Z) shortcut triggered",
                     Toast.LENGTH_LONG
             ).show()
-            true
+            //true
         } else if (event.keyCode == KeyEvent.KEYCODE_F && event.isCtrlPressed) {
             Toast.makeText(
                     v.context,
                     "Find (Ctrl + F) shortcut triggered",
                     Toast.LENGTH_LONG
             ).show()
-            true
+            //true
         }
         false
     }
@@ -79,13 +71,6 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
-        /*
-        model.loadCategories()
-        model.categoryList.observe(viewLifecycleOwner,CategoryListHelper(this))
-        model.loadTxns()
-        model.txnList.observe(viewLifecycleOwner,TxnListHelper(this))
-        */
-
         model.txnList.observe(viewLifecycleOwner,this)
         _binding = FragmentItemListBinding.inflate(inflater, container, false)
         return binding.root
@@ -97,7 +82,7 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
 
         ViewCompat.addOnUnhandledKeyEventListener(view, unhandledKeyEventListenerCompat)
 
-        val recyclerView: RecyclerView = binding.itemList
+
 
         // Leaving this not using view binding as it relies on if the view is visible the current
         // layout configuration (layout, layout-sw600dp)
@@ -171,14 +156,7 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
         @SuppressLint("SetTextI18n")
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = values[position]
-            var categoryName = item.category.name //"[Missing]"
-            /*
-            for(c in categories){
-                if(item.categoryId==c.categoryId) {
-                    categoryName = c.name
-                    break
-                }
-            }*/
+            val categoryName = item.category.name
 
             if(item.getOutstandingAmount() <0.01f) {
                 (item.amount().toString() + " for " + categoryName +  " PAID").also { holder.idView.text = it }
@@ -230,11 +208,7 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
         _binding = null
     }
 
-    fun showList() {
-
-       // (binding.itemList.adapter as SimpleItemRecyclerViewAdapter).da
-
-
+    private fun showList() {
         setupRecyclerView(binding.itemList,storedItemOnClickListener,storedOnContextClickListener)
     }
 
@@ -242,9 +216,5 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
     override fun onChanged(t: List<TxnWithCategory>?) {
         showList()
     }
-
-
-
-
 
 }
