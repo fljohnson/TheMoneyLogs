@@ -14,7 +14,7 @@ import java.sql.Types.NULL
 
 )
 data class PlannedTxn(
-    val amount:Float,
+    val amount:Float? =null,
     val payee:String,
     @ColumnInfo(name = "due_date")
     val dateDue:Calendar? = null,

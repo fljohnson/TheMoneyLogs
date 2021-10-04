@@ -19,4 +19,12 @@ data class Category(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
     var categoryId:Int = 0
+
+    override fun toString(): String {
+        if(description.isNullOrEmpty())
+        {
+            return name
+        }
+        return "$name ($description)"
+    }
 }

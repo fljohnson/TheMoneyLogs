@@ -21,4 +21,6 @@ interface PlannedTxnDao {
 
     @Query("SELECT * FROM planned")
     fun getAllTxnsWithCategory(): Flow<List<TxnWithCategory>>
+    @Query("SELECT * FROM planned WHERE txn_id = :id")
+    fun getTxnWithCategory(id: Long): Flow<TxnWithCategory>
 }

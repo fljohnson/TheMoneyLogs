@@ -20,6 +20,6 @@
         tools:layout="@layout/fragment_item_detail">
         <argument
             android:name="item_id"
-            app:argType="integer" />
+            app:argType="long" />
     </fragment>
 </navigation>

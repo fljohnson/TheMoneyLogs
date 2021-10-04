@@ -15,11 +15,24 @@ data class TxnWithCategory(
     @Relation(parentColumn = "category_id",entityColumn = "id")
     val category:Category
 ) {
+    val transactionTitle: CharSequence
+        get() = run {
+        val rv:String = if(amount()==null) {
+            "(Unknown amount)"
+        } else {
+            "${amount()!!}"
+        }
+        "$rv for ${category.name} on ${dateDue()}"
+    }
+
+
     fun getOutstandingAmount(): Float {
+        if(txn.amount == null)
+            return 0f
         return txn.amount
     }
 
-    fun amount():Float {
+    fun amount():Float? {
         return txn.amount
     }
 

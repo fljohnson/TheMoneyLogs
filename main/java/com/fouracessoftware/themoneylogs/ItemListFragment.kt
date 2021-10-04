@@ -36,6 +36,8 @@ import kotlin.collections.ArrayList
  */
 
 class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
+    private lateinit var storedItemOnClickListener: View.OnClickListener
+    private lateinit var storedOnContextClickListener:View.OnContextClickListener
     private var txns_ready: Boolean = false
     private var categories_ready: Boolean = false
     private var just_started: Boolean = true
@@ -104,15 +106,14 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
         /** Click Listener to trigger navigation based on if you have
          * a single pane layout or two pane layout
          */
-        val onClickListener = View.OnClickListener { itemView ->
+        storedItemOnClickListener = View.OnClickListener { itemView ->
             val item = itemView.tag as TxnWithCategory
-           // model.select(item)
+            model.select(item)
             val bundle = Bundle()
-            /*
-            bundle.putInt(
+            bundle.putLong(
                     ItemDetailFragment.ARG_ITEM_ID,
-                    item.id
-            )*/
+                    item.txn.txnId
+            )
             if (itemDetailFragmentContainer != null) {
                 itemDetailFragmentContainer.findNavController()
                         .navigate(R.id.fragment_item_detail, bundle)
@@ -121,12 +122,14 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
             }
         }
 
+
+
         /**
          * Context click listener to handle Right click events
          * from mice and trackpad input to provide a more native
          * experience on larger screen devices
          */
-        val onContextClickListener = View.OnContextClickListener { v ->
+        storedOnContextClickListener = View.OnContextClickListener { v ->
             val item = v.tag as PrototypeContent.PrototypeItem
             Toast.makeText(
                     v.context,
@@ -177,7 +180,7 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
                 }
             }*/
 
-            if(item.amount() <0.01f) {
+            if(item.getOutstandingAmount() <0.01f) {
                 (item.amount().toString() + " for " + categoryName +  " PAID").also { holder.idView.text = it }
             }
             else {
@@ -230,26 +233,9 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
     fun showList() {
 
        // (binding.itemList.adapter as SimpleItemRecyclerViewAdapter).da
-        val onClickListener = View.OnClickListener { itemView ->
-            val item = itemView.tag as TxnWithCategory
-           // model.select(item)
-            val bundle = Bundle()
-            /*
-            bundle.putInt(
-                    ItemDetailFragment.ARG_ITEM_ID,
-                    item.id
-            )*/
-            /*
-            if (itemDetailFragmentContainer != null) {
-                itemDetailFragmentContainer.findNavController()
-                    .navigate(R.id.fragment_item_detail, bundle)
-            } else {
-                itemView.findNavController().navigate(R.id.show_item_detail, bundle)
-            }*/
-        }
-        val onContextClickListener = View.OnContextClickListener{false}
 
-        setupRecyclerView(binding.itemList,onClickListener,onContextClickListener)
+
+        setupRecyclerView(binding.itemList,storedItemOnClickListener,storedOnContextClickListener)
     }
 
 
@@ -257,32 +243,8 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
         showList()
     }
 
-    fun armCategories() {
-        categories_ready = true;
-        if(txns_ready && categories_ready) {
-            showList()
-        }
-    }
 
 
-    fun armTxns() {
-        txns_ready = true;
-        if(txns_ready && categories_ready) {
-            showList()
-       }
-    }
 
-    private class CategoryListHelper(val caller:ItemListFragment) : Observer<List<Category>> {
-        override fun onChanged(t: List<Category>?) {
-            caller.armCategories()
-        }
-
-    }
-
-    private class TxnListHelper(val caller:ItemListFragment) : Observer<List<PlannedTxn>> {
-        override fun onChanged(t: List<PlannedTxn>?) {
-            caller.armTxns()
-        }
-    }
 
 }
