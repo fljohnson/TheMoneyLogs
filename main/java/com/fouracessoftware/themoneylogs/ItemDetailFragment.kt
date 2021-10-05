@@ -14,6 +14,7 @@ import android.widget.TextView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import com.fouracessoftware.themoneylogs.data.roomy.Category
+import com.fouracessoftware.themoneylogs.data.roomy.PlanNote
 import com.fouracessoftware.themoneylogs.data.roomy.TxnWithCategory
 import com.fouracessoftware.themoneylogs.databinding.FragmentItemDetailBinding
 import com.google.android.material.button.MaterialButton
@@ -62,9 +63,25 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
                     // Update the UI
                     updateContent()
                 })
+                model.getTxnPlanNotes(it.getLong(ARG_ITEM_ID)).observe(viewLifecycleOwner, {
+                    notesList -> updateNotes(notesList)
+                })
             }
         }
 
+    }
+
+    private fun updateNotes(notesList: List<PlanNote>) {
+        var content = ""
+        for(line in notesList){
+            if(content.isNotEmpty())
+            {
+                content+="\r\n"
+            }
+            content+="-"+line.content
+        }
+
+        binding.itemNotes?.text = content
     }
 
     private val dateBtnListener = View.OnClickListener {v ->

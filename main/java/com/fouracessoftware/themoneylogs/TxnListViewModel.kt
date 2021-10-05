@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import com.fouracessoftware.themoneylogs.data.roomy.Category
 import com.fouracessoftware.themoneylogs.data.roomy.CentralContent
+import com.fouracessoftware.themoneylogs.data.roomy.PlanNote
 import com.fouracessoftware.themoneylogs.data.roomy.TxnWithCategory
 
 class TxnListViewModel: ViewModel() {
@@ -19,4 +20,8 @@ class TxnListViewModel: ViewModel() {
     fun getTxn(id:Long):LiveData<TxnWithCategory> {
         return CentralContent.plannedTxnDao.getTxnWithCategory(id).asLiveData()
     }
+    fun getTxnPlanNotes(id:Long):LiveData<List<PlanNote>> {
+        return CentralContent.planNoteDao.getNotesForTxn(id).asLiveData()
+    }
+
 }

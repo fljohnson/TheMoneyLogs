@@ -4,11 +4,12 @@ import android.content.Context
 import androidx.room.*
 
 
-@Database(entities = [Category::class, PlannedTxn::class], version = 1)
+@Database(entities = [Category::class, PlannedTxn::class, PlanNote::class], version = 1)
 @TypeConverters(Converters::class)
 abstract class AppDatabase: RoomDatabase() {
         abstract fun categoryDao(): CategoryDao
         abstract fun plannedTxnDao(): PlannedTxnDao
+        abstract fun planNoteDao(): PlanNoteDao
 
         companion object {
 

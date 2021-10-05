@@ -17,6 +17,8 @@ object CentralContent  {
     private var informant = MutableLiveData<ArrayList<Category>>()
     var plannedTxnDao: PlannedTxnDao
     var categoryDao:CategoryDao
+    var planNoteDao: PlanNoteDao
+
     private var categoriesReady = false
     private var plannedsReady = false
 
@@ -24,6 +26,7 @@ object CentralContent  {
         informant.value = categoires
         categoryDao = AppDatabase.getInstance(MainApplication.getContext()).categoryDao()
         plannedTxnDao = AppDatabase.getInstance(MainApplication.getContext()).plannedTxnDao()
+        planNoteDao = AppDatabase.getInstance(MainApplication.getContext()).planNoteDao()
     }
 
     fun engage() {
@@ -51,7 +54,10 @@ object CentralContent  {
 
     }
 
-    private fun insertPlanned(incoming:MutableMap<String,String>) {
+    private fun insertPlanned(incoming:MutableMap<String,String>,
+                              notes:List<MutableMap<String,String>>?=null,
+                              actuals:List<MutableMap<String,String>>?=null
+    ) {
         var category:Category? = null
         println("Grrr "+ categoires.size)
         for(c in categoires){
@@ -78,7 +84,14 @@ object CentralContent  {
             categoryId = category.categoryId
         )
        plannedTxnDao.insertTxnWithCategory(txn,category)
-
+        val txnId = plannedTxnDao.getMaxId()
+            println("AHA:$txnId")
+        if(notes != null){
+            for(noteData in notes){
+                val planNote = PlanNote(xid=txnId,content=noteData["Content"])
+                planNoteDao.insertNote(planNote)
+            }
+        }
     }
     private suspend fun getCategories() {
 
@@ -97,7 +110,7 @@ object CentralContent  {
         return rv
     }
 
-    fun sproing() {
+    private fun sproing() {
 
 
             insertPlanned(
@@ -148,6 +161,7 @@ object CentralContent  {
                     "Category" to "Telecom",
                     "Payee" to "GoDaddy"
                 )
+            ,notes = listOf(mutableMapOf("Content" to "PayPal acct > $13.99 at the time"))
             )
             insertPlanned(
                 mutableMapOf(
@@ -155,7 +169,11 @@ object CentralContent  {
                     "Amount" to "19.95",
                     "Category" to "Telecom",
                     "Payee" to "Sisna.com"
+                ),
+                actuals = listOf(
+                    mutableMapOf("xid" to "6","Date" to "2021-09-07","Amount" to "19.95")
                 )
+
             )
             insertPlanned(
                 mutableMapOf(
@@ -163,14 +181,25 @@ object CentralContent  {
                     "Amount" to "20.1",
                     "Category" to "Life Insurance",
                     "Payee" to "Colonial Penn"
-                )
+                ),
+                actuals = listOf(mutableMapOf("xid" to "7","Date" to "2021-09-09","Amount" to "20.1"))
+
             )
+
             insertPlanned(
                 mutableMapOf(
                     "Date" to "",
                     "Amount" to "90",
                     "Category" to "Groceries",
                     "Payee" to ""
+                ),
+               notes = listOf(
+                    mutableMapOf("Content" to "Moved $44 plus $16 from last month to PFCU savings on 9/1")
+                ),
+                actuals = listOf(
+                    mutableMapOf("xid" to "8","Date" to "2021-09-05","Amount" to "26.5"),
+                    mutableMapOf("xid" to "8","Date" to "2021-09-09","Amount" to "34.49"),
+                    mutableMapOf("xid" to "8","Date" to "2021-09-02","Amount" to "25.98")
                 )
             )
             insertPlanned(
@@ -197,6 +226,9 @@ object CentralContent  {
                     "Amount" to "29",
                     "Category" to "Health Insurance",
                     "Payee" to "IBX"
+                ),
+               notes = listOf(
+                    mutableMapOf("xid" to "11","Content" to "plus arrears;Actual is $57")
                 )
             )
 
@@ -222,6 +254,9 @@ object CentralContent  {
                     "Amount" to "45",
                     "Category" to "Debt",
                     "Payee" to "PayPalCredit"
+                ),
+                notes = listOf(
+                    mutableMapOf("xid" to "14","Content" to "Moved to high-yield savings, payment to be actually sent 3 days before due date")
                 )
             )
             insertPlanned(
@@ -230,7 +265,9 @@ object CentralContent  {
                     "Amount" to "65",
                     "Category" to "Medical",
                     "Payee" to "CVS"
-                )
+                ),
+                notes = listOf(mutableMapOf("xid" to "15","Content" to "Rx; correct figure")),
+                actuals = listOf(mutableMapOf("xid" to "15","Date" to "2021-09-03","Amount" to "79.51"))
             )
             insertPlanned(
                 mutableMapOf(
@@ -238,6 +275,10 @@ object CentralContent  {
                     "Amount" to "25",
                     "Category" to "Debt",
                     "Payee" to "IRS"
+                ),
+                notes = listOf(
+                    mutableMapOf("xid" to "16","Content" to "(2016 tax bill and 2018 tax bill) "),
+                    mutableMapOf("xid" to "16","Content" to "Pushed into credit-card payment ($73 due 9/17)")
                 )
             )
             insertPlanned(
@@ -246,6 +287,9 @@ object CentralContent  {
                     "Amount" to "40",
                     "Category" to "Medical",
                     "Payee" to "Psychiatrist"
+                ),
+                notes = listOf(
+                    mutableMapOf("xid" to "17","Content" to "actual due date seems to be 10 cal days in advance")
                 )
             )
             insertPlanned(
@@ -254,6 +298,10 @@ object CentralContent  {
                     "Amount" to "15",
                     "Category" to "Medical",
                     "Payee" to "Doctor visit"
+                ),
+                actuals =
+                listOf(
+                    mutableMapOf("xid" to "18","Date" to "2021-09-12","Amount" to "0")
                 )
             )
 

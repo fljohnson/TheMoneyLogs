@@ -1,15 +1,12 @@
 package com.fouracessoftware.themoneylogs.data.roomy
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PlannedTxnDao {
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertTxnWithCategory(txn: PlannedTxn,category: Category)
 
 
@@ -19,8 +16,11 @@ interface PlannedTxnDao {
     @Query("SELECT * FROM planned")
     fun getAllTxns(): List<PlannedTxn>
 
-    @Query("SELECT * FROM planned")
+    @Transaction @Query("SELECT * FROM planned")
     fun getAllTxnsWithCategory(): Flow<List<TxnWithCategory>>
+    @Transaction
     @Query("SELECT * FROM planned WHERE txn_id = :id")
     fun getTxnWithCategory(id: Long): Flow<TxnWithCategory>
+    @Query("SELECT max(txn_id) from PLANNED")
+    fun getMaxId():Long
 }
