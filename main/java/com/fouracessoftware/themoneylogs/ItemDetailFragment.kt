@@ -13,6 +13,7 @@ import android.widget.AutoCompleteTextView
 import android.widget.TextView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import com.fouracessoftware.themoneylogs.data.roomy.ActualTxn
 import com.fouracessoftware.themoneylogs.data.roomy.Category
 import com.fouracessoftware.themoneylogs.data.roomy.PlanNote
 import com.fouracessoftware.themoneylogs.data.roomy.TxnWithCategory
@@ -29,6 +30,7 @@ import com.google.android.material.datepicker.MaterialDatePicker
 class ItemDetailFragment : Fragment(), Observer<List<Category>> {
 
 
+    private var actualTxns: List<ActualTxn>? = null
     private var dateBtn: MaterialButton? = null
     private var chosenDate: String =""
 
@@ -65,6 +67,10 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
                 })
                 model.getTxnPlanNotes(it.getLong(ARG_ITEM_ID)).observe(viewLifecycleOwner, {
                     notesList -> updateNotes(notesList)
+                })
+                model.getActualTxnsForPlanned(it.getLong(ARG_ITEM_ID)).observe(viewLifecycleOwner,{
+                    actualsList -> actualTxns = actualsList
+                    updateContent()
                 })
             }
         }
@@ -157,16 +163,18 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
            // itemDetailTextView.text = it.getNotes() TODO
             val fullAmt = it.amount()
             var toShow = fullAmt.toString()
-            val remainingAmt = it.getOutstandingAmount()
+            val remainingAmt = getOutstandingAmount(it)
             if(remainingAmt <0f) {
-                /* TODO once the actuals data structure exists
-                toShow = (it.getTotalPaid())
-                binding.plannedDate?.setText("Paid")
+                //TODO once the actuals data structure exists
+                toShow = getTotalPaid(it).toString()
+                binding.plannedDate?.text = "Paid"
                 binding.plannedDate?.isEnabled = false
-                */
+                binding.actualDate?.text = "Paid"
+                binding.actualDate?.isEnabled = false
+
             }
             else {
-                toShow = it.getOutstandingAmount().toString()
+                toShow = getOutstandingAmount(it).toString()
                 if(it.dateDue().trim().isNotEmpty()) {
                     binding.plannedDate?.text = it.dateDue()
                 }
@@ -177,6 +185,21 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
 
             (binding.categoryMenu!!.editText as? AutoCompleteTextView)?.setText(it.category.name,false)
         }
+    }
+
+    private fun getTotalPaid(it: TxnWithCategory):Float {
+        var amt = 0f
+        if(actualTxns != null) {
+            for(tx in actualTxns!!) {
+                amt += tx.amount
+            }
+        }
+        return amt
+    }
+    private fun getOutstandingAmount(it: TxnWithCategory): Float {
+        var amt = it.getOutstandingAmount()
+        amt -=getTotalPaid(it)
+        return amt
     }
 
     companion object {

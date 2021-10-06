@@ -18,6 +18,7 @@ object CentralContent  {
     var plannedTxnDao: PlannedTxnDao
     var categoryDao:CategoryDao
     var planNoteDao: PlanNoteDao
+    var actualTxnDao: ActualTxnDao
 
     private var categoriesReady = false
     private var plannedsReady = false
@@ -27,6 +28,7 @@ object CentralContent  {
         categoryDao = AppDatabase.getInstance(MainApplication.getContext()).categoryDao()
         plannedTxnDao = AppDatabase.getInstance(MainApplication.getContext()).plannedTxnDao()
         planNoteDao = AppDatabase.getInstance(MainApplication.getContext()).planNoteDao()
+        actualTxnDao = AppDatabase.getInstance(MainApplication.getContext()).actualTxnDao()
     }
 
     fun engage() {
@@ -90,6 +92,16 @@ object CentralContent  {
             for(noteData in notes){
                 val planNote = PlanNote(xid=txnId,content=noteData["Content"])
                 planNoteDao.insertNote(planNote)
+            }
+        }
+        if(actuals != null){
+            for(actualData in actuals) {
+                var paiddate = getCalendarFor(actualData["Date"]!!)
+
+                val actualTxn = ActualTxn(xid=txnId,
+                    datePaid=paiddate,
+                    amount=PrototypeContent.safeExtract(actualData["Amount"]))
+                actualTxnDao.insertActualTxn(actualTxn)
             }
         }
     }

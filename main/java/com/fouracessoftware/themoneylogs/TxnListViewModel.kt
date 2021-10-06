@@ -4,10 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
-import com.fouracessoftware.themoneylogs.data.roomy.Category
-import com.fouracessoftware.themoneylogs.data.roomy.CentralContent
-import com.fouracessoftware.themoneylogs.data.roomy.PlanNote
-import com.fouracessoftware.themoneylogs.data.roomy.TxnWithCategory
+import com.fouracessoftware.themoneylogs.data.roomy.*
 
 class TxnListViewModel: ViewModel() {
     private val selected = MutableLiveData<TxnWithCategory>()
@@ -23,5 +20,7 @@ class TxnListViewModel: ViewModel() {
     fun getTxnPlanNotes(id:Long):LiveData<List<PlanNote>> {
         return CentralContent.planNoteDao.getNotesForTxn(id).asLiveData()
     }
-
+    fun getActualTxnsForPlanned(id:Long):LiveData<List<ActualTxn>> {
+        return CentralContent.actualTxnDao.getActualsForTxn(id).asLiveData()
+    }
 }
