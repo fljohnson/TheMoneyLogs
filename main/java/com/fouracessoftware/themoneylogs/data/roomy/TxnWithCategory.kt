@@ -11,7 +11,9 @@ data class TxnWithCategory(
     @Embedded
     val txn:PlannedTxn,
     @Relation(parentColumn = "category_id",entityColumn = "id")
-    val category:Category
+    val category:Category,
+    @Relation(parentColumn = "txn_id",entityColumn = "xid")
+    val actuals:List<ActualTxn>
 ) {
     val transactionTitle: CharSequence
         get() = run {
@@ -27,7 +29,14 @@ data class TxnWithCategory(
     fun getOutstandingAmount(): Float {
         if(txn.amount == null)
             return 0f
-        return txn.amount
+        if(actuals.isNullOrEmpty()) {
+            return txn.amount
+        }
+        var rv = txn.amount
+        for(line in actuals) {
+            rv -= line.amount
+        }
+        return rv
     }
 
     fun amount():Float? {

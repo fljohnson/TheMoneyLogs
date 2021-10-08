@@ -96,7 +96,7 @@ object CentralContent  {
         }
         if(actuals != null){
             for(actualData in actuals) {
-                var paiddate = getCalendarFor(actualData["Date"]!!)
+                val paiddate = getCalendarFor(actualData["Date"]!!)
 
                 val actualTxn = ActualTxn(xid=txnId,
                     datePaid=paiddate,

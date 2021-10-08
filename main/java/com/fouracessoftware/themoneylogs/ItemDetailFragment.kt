@@ -33,6 +33,7 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
     private var actualTxns: List<ActualTxn>? = null
     private var dateBtn: MaterialButton? = null
     private var chosenDate: String =""
+    private var notes =""
 
     private val model: TxnListViewModel by viewModels()
     /**
@@ -66,7 +67,15 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
                     updateContent()
                 })
                 model.getTxnPlanNotes(it.getLong(ARG_ITEM_ID)).observe(viewLifecycleOwner, {
-                    notesList -> updateNotes(notesList)
+                    notesList -> notes=""
+                    for(line in notesList){
+                        if(notes.isNotEmpty())
+                        {
+                            notes+="\r\n"
+                        }
+                        notes+="-"+line.content
+                    }
+                    updateContent()
                 })
                 model.getActualTxnsForPlanned(it.getLong(ARG_ITEM_ID)).observe(viewLifecycleOwner,{
                     actualsList -> actualTxns = actualsList
@@ -77,18 +86,6 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
 
     }
 
-    private fun updateNotes(notesList: List<PlanNote>) {
-        var content = ""
-        for(line in notesList){
-            if(content.isNotEmpty())
-            {
-                content+="\r\n"
-            }
-            content+="-"+line.content
-        }
-
-        binding.itemNotes?.text = content
-    }
 
     private val dateBtnListener = View.OnClickListener {v ->
         if(v==binding.plannedDate) {
@@ -164,7 +161,7 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
             val fullAmt = it.amount()
             var toShow = fullAmt.toString()
             val remainingAmt = getOutstandingAmount(it)
-            if(remainingAmt <0f) {
+            if(remainingAmt <=0f) {
                 //TODO once the actuals data structure exists
                 toShow = getTotalPaid(it).toString()
                 binding.plannedDate?.text = "Paid"
@@ -185,6 +182,18 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
 
             (binding.categoryMenu!!.editText as? AutoCompleteTextView)?.setText(it.category.name,false)
         }
+
+        var toto=notes
+        if(actualTxns != null) {
+            for(line in actualTxns!!) {
+                if(toto.isNotEmpty()) {
+                    toto+="\r\n"
+                }
+                toto+="${line.datePaid()}:${line.amount.toString()} paid"
+            }
+        }
+
+        binding.itemNotes?.text = toto
     }
 
     private fun getTotalPaid(it: TxnWithCategory):Float {
