@@ -12,29 +12,56 @@
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/app_bar_height"
+        android:textAlignment="center"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:id="@+id/toolbar_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_gravity="start|top"
+            android:elevation="20dp"
+            android:foregroundGravity="top|left"
+            android:textAlignment="center"
+            android:visibility="visible"
+            app:collapsedTitleGravity="top|start"
             app:collapsedTitleTextAppearance="@style/TextAppearance.App.CollapsingToolbar.Collapsed"
-            app:contentScrim="?attr/colorPrimary"
-            app:expandedTitleMarginBottom="28dp"
-            app:expandedTitleMarginStart="72dp"
-            app:expandedTitleTextAppearance="@style/TextAppearance.App.CollapsingToolbar.Expanded"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:contentScrim="@color/purple_500"
+            app:expandedTitleGravity="top|start"
+            app:expandedTitleMarginBottom="0dp"
+            app:expandedTitleMarginStart="0dp"
+            app:expandedTitleTextAppearance="@style/TextAppearance.AppCompat.Display1"
             app:maxLines="2"
+            app:title="Testing"
+            app:titleEnabled="true"
             app:toolbarId="@+id/toolbar">
+
+            <TextView
+                android:id="@+id/txnTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:maxLines="2"
+                android:paddingStart="56sp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/detail_toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_horizontal|top"
+                android:clipChildren="false"
                 android:elevation="0dp"
-                app:layout_collapseMode="pin"
-                app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light" />
-
+                android:gravity="center|top"
+                android:textAlignment="viewStart"
+                app:layout_collapseMode="none"
+                app:navigationIcon="@android:drawable/ic_menu_close_clear_cancel"
+                app:navigationIconTint="@color/white"
+                app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light"
+                app:subtitleCentered="false"
+                app:titleCentered="false"
+                app:titleMarginTop="0dp"
+                app:titleTextAppearance="@style/TextAppearance.AppCompat.Display1" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
     </com.google.android.material.appbar.AppBarLayout>

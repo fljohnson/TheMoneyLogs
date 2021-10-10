@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -80,6 +81,7 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        (requireActivity() as AppCompatActivity).supportActionBar?.show()
         ViewCompat.addOnUnhandledKeyEventListener(view, unhandledKeyEventListenerCompat)
 
 
@@ -94,6 +96,7 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
         storedItemOnClickListener = View.OnClickListener { itemView ->
             val item = itemView.tag as TxnWithCategory
             model.select(item)
+            (requireActivity() as AppCompatActivity).supportActionBar?.hide()
             val bundle = Bundle()
             bundle.putLong(
                     ItemDetailFragment.ARG_ITEM_ID,

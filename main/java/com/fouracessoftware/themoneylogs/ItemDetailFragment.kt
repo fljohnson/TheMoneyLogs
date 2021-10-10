@@ -1,6 +1,7 @@
 package com.fouracessoftware.themoneylogs
 
 import android.content.Context
+import android.content.DialogInterface
 import android.icu.util.Calendar
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -11,8 +12,11 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import com.fouracessoftware.themoneylogs.data.roomy.ActualTxn
 import com.fouracessoftware.themoneylogs.data.roomy.Category
 import com.fouracessoftware.themoneylogs.data.roomy.PlanNote
@@ -20,6 +24,7 @@ import com.fouracessoftware.themoneylogs.data.roomy.TxnWithCategory
 import com.fouracessoftware.themoneylogs.databinding.FragmentItemDetailBinding
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 /**
  * A fragment representing a single Item detail screen.
@@ -54,6 +59,7 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
 
 
         arguments?.let {
@@ -146,6 +152,17 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
 
         binding.plannedDate?.setOnClickListener(dateBtnListener)
         binding.actualDate?.setOnClickListener(dateBtnListener)
+
+        binding.detailToolbar?.setNavigationOnClickListener({
+            MaterialAlertDialogBuilder(requireContext())
+                .setMessage("Changes will not be saved")
+                .setNegativeButton("Cancel", null)
+                .setPositiveButton("OK", DialogInterface.OnClickListener { v, i ->
+                    findNavController().navigateUp()
+                })
+                .show()
+        })
+
         updateContent()
 
 
@@ -153,8 +170,9 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
     }
 
     private fun updateContent() {
-        toolbarLayout?.title = item?.transactionTitle
-
+      //  toolbarLayout?.title = item?.transactionTitle
+        binding.txnTitle?.text = item?.transactionTitle
+        //setIcon(android.R.drawable.ic_menu_close_clear_cancel)
         // Show the placeholder content as text in a TextView.
         item?.let {
            // itemDetailTextView.text = it.getNotes() TODO
