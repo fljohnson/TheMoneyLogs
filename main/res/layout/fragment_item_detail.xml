@@ -19,7 +19,7 @@
             android:id="@+id/toolbar_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="start|top"
+            android:layout_gravity="center_horizontal"
             android:elevation="20dp"
             android:foregroundGravity="top|left"
             android:textAlignment="center"
@@ -40,10 +40,10 @@
                 android:id="@+id/txnTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="72sp"
+                android:layout_marginHorizontal="56sp"
                 android:background="@color/teal_700"
                 android:gravity="start"
-                android:maxLines="2"
+                android:maxLines="3"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
 
             <com.google.android.material.appbar.MaterialToolbar
@@ -54,7 +54,7 @@
                 android:clipChildren="false"
                 android:contextClickable="true"
                 android:elevation="0dp"
-                android:gravity="center|top"
+                android:gravity="start"
                 android:textAlignment="viewStart"
                 app:layout_collapseMode="none"
                 app:menu="@menu/item_action_bar"
@@ -132,13 +132,13 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/payee"
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:hint="@string/payee_payor"
             android:minHeight="48dp"
             android:minLines="1"
             android:textAlignment="gravity"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHeight_default="wrap"
+            app:layout_constrainedHeight="true"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/category_menu" />
 

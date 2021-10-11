@@ -11,6 +11,7 @@ import android.widget.AutoCompleteTextView
 import android.widget.TextView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.fouracessoftware.themoneylogs.data.roomy.ActualTxn
 import com.fouracessoftware.themoneylogs.data.roomy.Category
@@ -19,6 +20,7 @@ import com.fouracessoftware.themoneylogs.databinding.FragmentItemDetailBinding
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 
 /**
  * A fragment representing a single Item detail screen.
@@ -161,7 +163,7 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
 
             when (x.itemId) {
                 R.id.save -> {
-                    BeginSave()
+                    beginSave()
                     true
                 }
                 else -> {
@@ -176,37 +178,48 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
         return rootView
     }
 
-    private fun BeginSave() {
+    private class Bailor(val localNavController: NavController) : Snackbar.Callback() {
+        override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+            super.onDismissed(transientBottomBar, event)
+            localNavController.navigateUp()
+        }
+    }
+    private fun beginSave() {
         item?.let {
             it.amount = binding.plannedAmount?.text.toString().toFloat()
 
-            model.update(it)
 
-            model.message.observe(viewLifecycleOwner) {
-                if(it=="OK"){
-                    findNavController().navigateUp()
+            model.update(it)
+            model.message.observe(viewLifecycleOwner) { result ->
+                if(result =="OK"){
+
+
+                    binding.detailToolbar?.let { v ->
+                        Snackbar.make(v, "Successfully saved", Snackbar.LENGTH_SHORT)
+                            .addCallback(Bailor(findNavController()))
+                                .show()
+                            }
+                    }
                 }
             }
-        }
+
+
+
     }
 
 
     private fun updateContent() {
-      //  toolbarLayout?.title = item?.transactionTitle
         binding.txnTitle?.text = item?.transactionTitle
-        //setIcon(android.R.drawable.ic_menu_close_clear_cancel)
-        // Show the placeholder content as text in a TextView.
         item?.let {
            // itemDetailTextView.text = it.getNotes() TODO
-            val fullAmt = it.amount
-            var toShow = fullAmt.toString()
+         //   val fullAmt = it.amount
+            val toShow: String
             val remainingAmt = getOutstandingAmount(it)
             if(remainingAmt <=0f) {
-                //TODO once the actuals data structure exists
                 toShow = getTotalPaid(it).toString()
-                binding.plannedDate?.text = "Paid"
+                binding.plannedDate?.text = getString(R.string.lbl_paid)
                 binding.plannedDate?.isEnabled = false
-                binding.actualDate?.text = "Paid"
+                binding.actualDate?.text = getString(R.string.lbl_paid)
                 binding.actualDate?.isEnabled = false
 
             }

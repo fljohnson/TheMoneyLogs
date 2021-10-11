@@ -1,9 +1,6 @@
 package com.fouracessoftware.themoneylogs
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
+import androidx.lifecycle.*
 import com.fouracessoftware.themoneylogs.data.roomy.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +14,7 @@ class TxnListViewModel: ViewModel() {
         selected.value = item
     }
 
-    var message = flowOf("").asLiveData()
+    var message = MutableLiveData<String>("")
     val txnList: LiveData<List<TxnWithCategory>> = CentralContent.plannedTxnDao.getAllTxnsWithCategory().asLiveData()
     val categoryList: LiveData<List<Category>> = CentralContent.categoryDao.getAllCategories().asLiveData()
     fun getTxn(id:Long):LiveData<TxnWithCategory> {
@@ -32,8 +29,9 @@ class TxnListViewModel: ViewModel() {
 
     fun update(item: TxnWithCategory){
         CoroutineScope(Dispatchers.IO).launch {
+
             CentralContent.plannedTxnDao.update(item.txn)
-            message= flowOf("OK").asLiveData()
+            message.postValue("OK")
         }
 
 
