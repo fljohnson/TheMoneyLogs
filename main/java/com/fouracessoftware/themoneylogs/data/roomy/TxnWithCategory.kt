@@ -17,10 +17,10 @@ data class TxnWithCategory(
 ) {
     val transactionTitle: CharSequence
         get() = run {
-        val rv:String = if(amount()==null) {
+        val rv:String = if(amount==null) {
             "(Unknown amount)"
         } else {
-            "${amount()!!}"
+            "${amount!!}"
         }
         "$rv for ${category.name} on ${dateDue()}"
     }
@@ -30,18 +30,18 @@ data class TxnWithCategory(
         if(txn.amount == null)
             return 0f
         if(actuals.isNullOrEmpty()) {
-            return txn.amount
+            return txn.amount!!
         }
-        var rv = txn.amount
+        var rv = txn.amount!!
         for(line in actuals) {
             rv -= line.amount
         }
         return rv
     }
 
-    fun amount():Float? {
-        return txn.amount
-    }
+    var amount:Float? get() { return txn.amount}
+    set(value) {txn.amount = value}
+
 
     fun payee(): String {
         return txn.payee

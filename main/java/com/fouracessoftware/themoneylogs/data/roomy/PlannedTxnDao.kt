@@ -23,4 +23,7 @@ interface PlannedTxnDao {
     fun getTxnWithCategory(id: Long): Flow<TxnWithCategory>
     @Query("SELECT max(txn_id) from PLANNED")
     fun getMaxId():Long
+
+    @Update
+    fun update(txn: PlannedTxn)
 }

@@ -1,25 +1,19 @@
 package com.fouracessoftware.themoneylogs
 
 import android.content.Context
-import android.content.DialogInterface
 import android.icu.util.Calendar
 import android.os.Bundle
+import android.view.*
 import androidx.fragment.app.Fragment
 import com.google.android.material.appbar.CollapsingToolbarLayout
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navOptions
 import com.fouracessoftware.themoneylogs.data.roomy.ActualTxn
 import com.fouracessoftware.themoneylogs.data.roomy.Category
-import com.fouracessoftware.themoneylogs.data.roomy.PlanNote
 import com.fouracessoftware.themoneylogs.data.roomy.TxnWithCategory
 import com.fouracessoftware.themoneylogs.databinding.FragmentItemDetailBinding
 import com.google.android.material.button.MaterialButton
@@ -153,21 +147,49 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
         binding.plannedDate?.setOnClickListener(dateBtnListener)
         binding.actualDate?.setOnClickListener(dateBtnListener)
 
-        binding.detailToolbar?.setNavigationOnClickListener({
+        binding.detailToolbar?.setNavigationOnClickListener {
             MaterialAlertDialogBuilder(requireContext())
                 .setMessage("Changes will not be saved")
                 .setNegativeButton("Cancel", null)
-                .setPositiveButton("OK", DialogInterface.OnClickListener { v, i ->
+                .setPositiveButton("OK") { _, _ ->
                     findNavController().navigateUp()
-                })
+                }
                 .show()
-        })
+        }
+
+        binding.detailToolbar?.setOnMenuItemClickListener { x ->
+
+            when (x.itemId) {
+                R.id.save -> {
+                    BeginSave()
+                    true
+                }
+                else -> {
+                    false
+                }
+            }
+        }
 
         updateContent()
 
 
         return rootView
     }
+
+    private fun BeginSave() {
+        item?.let {
+            it.amount = binding.plannedAmount?.text.toString().toFloat()
+
+            model.update(it)
+
+            model.message.observe(viewLifecycleOwner) {
+                if(it=="OK"){
+                    findNavController().navigateUp()
+                }
+            }
+        }
+    }
+
 
     private fun updateContent() {
       //  toolbarLayout?.title = item?.transactionTitle
@@ -176,7 +198,7 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
         // Show the placeholder content as text in a TextView.
         item?.let {
            // itemDetailTextView.text = it.getNotes() TODO
-            val fullAmt = it.amount()
+            val fullAmt = it.amount
             var toShow = fullAmt.toString()
             val remainingAmt = getOutstandingAmount(it)
             if(remainingAmt <=0f) {
@@ -207,7 +229,7 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
                 if(toto.isNotEmpty()) {
                     toto+="\r\n"
                 }
-                toto+="${line.datePaid()}:${line.amount.toString()} paid"
+                toto+="${line.datePaid()}:${line.amount} paid"
             }
         }
 

@@ -12,7 +12,7 @@ import androidx.room.*
 
 )
 data class PlannedTxn(
-    val amount:Float? =null,
+    var amount:Float? =null,
     val payee:String,
     @ColumnInfo(name = "due_date")
     val dateDue:Calendar? = null,

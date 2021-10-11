@@ -38,11 +38,12 @@
 
             <TextView
                 android:id="@+id/txnTitle"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="72sp"
+                android:background="@color/teal_700"
                 android:gravity="start"
                 android:maxLines="2"
-                android:paddingStart="56sp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
 
             <com.google.android.material.appbar.MaterialToolbar
@@ -51,10 +52,12 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center_horizontal|top"
                 android:clipChildren="false"
+                android:contextClickable="true"
                 android:elevation="0dp"
                 android:gravity="center|top"
                 android:textAlignment="viewStart"
                 app:layout_collapseMode="none"
+                app:menu="@menu/item_action_bar"
                 app:navigationIcon="@android:drawable/ic_menu_close_clear_cancel"
                 app:navigationIconTint="@color/white"
                 app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light"

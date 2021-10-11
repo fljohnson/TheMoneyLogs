@@ -61,7 +61,6 @@ object CentralContent  {
                               actuals:List<MutableMap<String,String>>?=null
     ) {
         var category:Category? = null
-        println("Grrr "+ categoires.size)
         for(c in categoires){
             if(c.name.contentEquals(incoming["Category"])){
                 category = c
@@ -87,7 +86,6 @@ object CentralContent  {
         )
        plannedTxnDao.insertTxnWithCategory(txn,category)
         val txnId = plannedTxnDao.getMaxId()
-            println("AHA:$txnId")
         if(notes != null){
             for(noteData in notes){
                 val planNote = PlanNote(xid=txnId,content=noteData["Content"])

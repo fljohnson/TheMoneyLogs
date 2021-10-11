@@ -162,11 +162,11 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
             val categoryName = item.category.name
 
             if(item.getOutstandingAmount() <0.01f) {
-                (item.amount().toString() + " for " + categoryName +  " PAID").also { holder.idView.text = it }
+                (item.amount.toString() + " for " + categoryName +  " PAID").also { holder.idView.text = it }
             }
             else {
 
-                (item.amount().toString() + " for " + categoryName +  " on " + item.dateDue()).also {
+                (item.amount.toString() + " for " + categoryName +  " on " + item.dateDue()).also {
                     holder.idView.text = it
                 }
             }
