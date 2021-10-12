@@ -25,5 +25,5 @@ interface PlannedTxnDao {
     fun getMaxId():Long
 
     @Update
-    fun update(txn: PlannedTxn)
+    fun update(txn: PlannedTxn,category: Category)
 }

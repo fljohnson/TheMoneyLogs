@@ -4,6 +4,7 @@ import android.content.Context
 import android.icu.util.Calendar
 import android.os.Bundle
 import android.view.*
+import android.widget.AdapterView
 import androidx.fragment.app.Fragment
 import com.google.android.material.appbar.CollapsingToolbarLayout
 import android.widget.ArrayAdapter
@@ -172,6 +173,15 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
             }
         }
 
+        (binding.categoryMenu!!.editText as AutoCompleteTextView).setOnItemClickListener { _: AdapterView<*>, _: View, i: Int, _: Long ->
+
+            val adapteur = (binding.categoryMenu!!.editText as AutoCompleteTextView).adapter as CategoryAdapter
+            item?.txn?.categoryId = adapteur.getItem(i)?.categoryId!!
+            item?.category = adapteur.getItem(i)!!
+            //and finally
+            updateContent()
+        }
+
         updateContent()
 
 
@@ -187,7 +197,6 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
     private fun beginSave() {
         item?.let {
             it.amount = binding.plannedAmount?.text.toString().toFloat()
-
 
             model.update(it)
             model.message.observe(viewLifecycleOwner) { result ->
@@ -216,7 +225,7 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
             val toShow: String
             val remainingAmt = getOutstandingAmount(it)
             if(remainingAmt <=0f) {
-                toShow = getTotalPaid(it).toString()
+                toShow = getTotalPaid().toString()
                 binding.plannedDate?.text = getString(R.string.lbl_paid)
                 binding.plannedDate?.isEnabled = false
                 binding.actualDate?.text = getString(R.string.lbl_paid)
@@ -249,7 +258,7 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
         binding.itemNotes?.text = toto
     }
 
-    private fun getTotalPaid(it: TxnWithCategory):Float {
+    private fun getTotalPaid():Float {
         var amt = 0f
         if(actualTxns != null) {
             for(tx in actualTxns!!) {
@@ -260,7 +269,7 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
     }
     private fun getOutstandingAmount(it: TxnWithCategory): Float {
         var amt = it.getOutstandingAmount()
-        amt -=getTotalPaid(it)
+        amt -=getTotalPaid()
         return amt
     }
 

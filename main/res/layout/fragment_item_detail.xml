@@ -41,7 +41,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="56sp"
-                android:background="@color/teal_700"
                 android:gravity="start"
                 android:maxLines="3"
                 android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
@@ -89,7 +88,7 @@
                 android:id="@+id/category_textview"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:inputType="none"
+                android:inputType="none|textWebEditText"
                 android:textColorHint="#616161"
                 tools:ignore="TextContrastCheck,SpeakableTextPresentCheck" />
 

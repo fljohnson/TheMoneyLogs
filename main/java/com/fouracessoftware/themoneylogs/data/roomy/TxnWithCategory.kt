@@ -11,7 +11,7 @@ data class TxnWithCategory(
     @Embedded
     val txn:PlannedTxn,
     @Relation(parentColumn = "category_id",entityColumn = "id")
-    val category:Category,
+    var category:Category,
     @Relation(parentColumn = "txn_id",entityColumn = "xid")
     val actuals:List<ActualTxn>
 ) {

@@ -17,7 +17,7 @@ data class PlannedTxn(
     @ColumnInfo(name = "due_date")
     val dateDue:Calendar? = null,
     @ColumnInfo(name = "category_id")
-    val categoryId:Int
+    var categoryId:Int
 
 
 ) {

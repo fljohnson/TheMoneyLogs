@@ -30,7 +30,7 @@ class TxnListViewModel: ViewModel() {
     fun update(item: TxnWithCategory){
         CoroutineScope(Dispatchers.IO).launch {
 
-            CentralContent.plannedTxnDao.update(item.txn)
+            CentralContent.plannedTxnDao.update(item.txn,item.category)
             message.postValue("OK")
         }
 
