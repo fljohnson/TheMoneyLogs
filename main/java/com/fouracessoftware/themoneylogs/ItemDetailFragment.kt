@@ -1,6 +1,7 @@
 package com.fouracessoftware.themoneylogs
 
 import android.content.Context
+import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import android.os.Bundle
 import android.view.*
@@ -22,6 +23,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import java.util.*
 
 /**
  * A fragment representing a single Item detail screen.
@@ -103,14 +105,20 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
         chosenDate = ""
         val whatToSay: String
         if(isPlanning) {
-            whatToSay = R.string.lbl_set_date_paid.toString()
+            whatToSay = getString(R.string.lbl_set_due_date)
             dateBtn = binding.plannedDate
         }
         else {
-            whatToSay = R.string.lbl_set_due_date.toString()
+            whatToSay = getString(R.string.lbl_set_date_paid)
             dateBtn = binding.actualDate
         }
-        val defaultDate = MaterialDatePicker.todayInUtcMilliseconds()
+
+        var defaultDate = MaterialDatePicker.todayInUtcMilliseconds() //what MDP thinks is the correct time
+        val currentDate = getCalendarForDate(dateBtn?.text!!)
+        if(currentDate != null) {
+            defaultDate = currentDate.timeInMillis
+
+        }
         val datePicker =
             MaterialDatePicker.Builder.datePicker()
                 .setTitleText(whatToSay)
@@ -120,20 +128,33 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
         //if the user commits to the date, get the value
         datePicker.addOnPositiveButtonClickListener {
             val calendar = Calendar.getInstance()
-            calendar.timeInMillis = datePicker.selection!!
-            chosenDate = "${calendar.get(Calendar.YEAR)}-${1+calendar.get(Calendar.MONTH)}-${1+calendar.get(Calendar.DAY_OF_MONTH)}"
+            //the MaterialDatePicker turned up off by a day, so we'll goose it in (FLJ, 10/12/2021)
+            calendar.timeInMillis = 24*3600000 + datePicker.selection!!
+            //chosenDate = "${calendar.get(Calendar.YEAR)}-${1+calendar.get(Calendar.MONTH)}-${1+calendar.get(Calendar.DAY_OF_MONTH)}"
+            if(isPlanning)
+                item?.txn?.dateDue = calendar
+            updateContent()
         }
 
         datePicker.addOnDismissListener {
-           if(chosenDate.isNotEmpty()){
-               dateBtn?.text = chosenDate
-               dateBtn = null
-           }
+            dateBtn=null
         }
         //show it!
         datePicker.show(this.childFragmentManager,"tat")
     }
 
+    fun getCalendarForDate(textdate:CharSequence):Calendar? {
+        val outdate = Calendar.getInstance()
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+
+        try {
+            outdate.time = dateFormat.parse(textdate.toString())
+           // dateFormat.format(outdate)
+            return outdate
+        } catch (ecch:Exception) {
+            return null
+        }
+    }
     override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
@@ -188,28 +209,31 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
         return rootView
     }
 
-    private class Bailor(val localNavController: NavController) : Snackbar.Callback() {
+    inner class Bailor : Snackbar.Callback() {
         override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
             super.onDismissed(transientBottomBar, event)
-            localNavController.navigateUp()
+            findNavController().navigateUp()
         }
     }
     private fun beginSave() {
         item?.let {
             it.amount = binding.plannedAmount?.text.toString().toFloat()
 
-            model.update(it)
-            model.message.observe(viewLifecycleOwner) { result ->
-                if(result =="OK"){
+
+                model.update(it)
+                //findNavController().navigateUp()
+                model.message.observe(viewLifecycleOwner) { result ->
+                    if(result =="OK"){
 
 
-                    binding.detailToolbar?.let { v ->
-                        Snackbar.make(v, "Successfully saved", Snackbar.LENGTH_SHORT)
-                            .addCallback(Bailor(findNavController()))
+                        binding.root?.let { v ->
+                            Snackbar.make(v, "Successfully saved", Snackbar.LENGTH_SHORT)
+                                .addCallback(Bailor())
                                 .show()
-                            }
+                        }
                     }
                 }
+
             }
 
 

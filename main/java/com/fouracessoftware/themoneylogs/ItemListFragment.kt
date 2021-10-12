@@ -21,6 +21,7 @@ import com.fouracessoftware.themoneylogs.data.PrototypeContent
 import com.fouracessoftware.themoneylogs.data.roomy.TxnWithCategory
 import com.fouracessoftware.themoneylogs.databinding.FragmentItemListBinding
 import com.fouracessoftware.themoneylogs.databinding.ItemListContentBinding
+import com.google.android.material.snackbar.Snackbar
 
 /**
  * A Fragment representing a list of Pings. This fragment
@@ -75,6 +76,7 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
         model.txnList.observe(viewLifecycleOwner,this)
         _binding = FragmentItemListBinding.inflate(inflater, container, false)
         return binding.root
+
 
     }
 

@@ -15,7 +15,7 @@ data class PlannedTxn(
     var amount:Float? =null,
     val payee:String,
     @ColumnInfo(name = "due_date")
-    val dateDue:Calendar? = null,
+    var dateDue:Calendar? = null,
     @ColumnInfo(name = "category_id")
     var categoryId:Int
 
