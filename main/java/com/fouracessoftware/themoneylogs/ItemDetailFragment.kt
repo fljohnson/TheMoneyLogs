@@ -13,7 +13,6 @@ import android.widget.AutoCompleteTextView
 import android.widget.TextView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import com.fouracessoftware.themoneylogs.data.roomy.ActualTxn
 import com.fouracessoftware.themoneylogs.data.roomy.Category
@@ -36,14 +35,15 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
 
     private var actualTxns: List<ActualTxn>? = null
     private var dateBtn: MaterialButton? = null
-    private var chosenDate: String =""
     private var notes =""
 
     private val model: TxnListViewModel by viewModels()
+
     /**
      * The placeholder content this fragment is presenting.
      */
     private var item: TxnWithCategory? = null
+    private var changeCounter:TxnWithCategory? = null
 
     private lateinit var itemDetailTextView: TextView
     private var toolbarLayout: CollapsingToolbarLayout? = null
@@ -68,6 +68,7 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
                 // to load content from a content provider.
                 model.getTxn(it.getLong(ARG_ITEM_ID)).observe(viewLifecycleOwner, {
                         selected_item -> item = selected_item
+                        changeCounter = item?.copy() //apparently a deep copy
                     // Update the UI
                     updateContent()
                 })
@@ -102,7 +103,8 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
     }
 
     private fun startDatePicker(isPlanning: Boolean) {
-        chosenDate = ""
+
+
         val whatToSay: String
         if(isPlanning) {
             whatToSay = getString(R.string.lbl_set_due_date)
@@ -133,6 +135,8 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
             //chosenDate = "${calendar.get(Calendar.YEAR)}-${1+calendar.get(Calendar.MONTH)}-${1+calendar.get(Calendar.DAY_OF_MONTH)}"
             if(isPlanning)
                 item?.txn?.dateDue = calendar
+            else
+                dateBtn?.text = model.formatDate(calendar)
             updateContent()
         }
 
@@ -143,16 +147,16 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
         datePicker.show(this.childFragmentManager,"tat")
     }
 
-    fun getCalendarForDate(textdate:CharSequence):Calendar? {
+    private fun getCalendarForDate(textdate:CharSequence):Calendar? {
         val outdate = Calendar.getInstance()
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
 
-        try {
+        //now here's a neat Kotlin construct: a try-catch block can be an expression
+        return try {
             outdate.time = dateFormat.parse(textdate.toString())
-           // dateFormat.format(outdate)
-            return outdate
+            outdate
         } catch (ecch:Exception) {
-            return null
+            null
         }
     }
     override fun onCreateView(
@@ -172,13 +176,21 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
         binding.actualDate?.setOnClickListener(dateBtnListener)
 
         binding.detailToolbar?.setNavigationOnClickListener {
-            MaterialAlertDialogBuilder(requireContext())
-                .setMessage("Changes will not be saved")
-                .setNegativeButton("Cancel", null)
-                .setPositiveButton("OK") { _, _ ->
-                    findNavController().navigateUp()
-                }
-                .show()
+            if(!diffFromOriginal())
+            {
+                findNavController().navigateUp()
+            }
+            else
+            {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setMessage("Changes will not be saved ")
+                    .setNegativeButton("Cancel", null)
+                    .setPositiveButton("OK") { _, _ ->
+                        findNavController().navigateUp()
+                    }
+                    .show()
+
+            }
         }
 
         binding.detailToolbar?.setOnMenuItemClickListener { x ->
@@ -209,6 +221,26 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
         return rootView
     }
 
+    private fun diffFromOriginal(): Boolean {
+        changeCounter?.let {
+            if( !item?.category?.openEnded!!) {
+                if (it.amount.toString() != binding.plannedAmount?.text.toString())
+                    return true
+            }
+            if(item?.category?.categoryId != it.category.categoryId)
+                return true
+            val datePaid = getCalendarForDate(binding.actualDate?.text.toString())
+            if(datePaid != null) {
+                val amountPaid = binding.actualAmount?.text.toString()
+                if(amountPaid.isNotEmpty()) {
+                    return true
+                }
+            }
+        }
+
+        return false
+    }
+
     inner class Bailor : Snackbar.Callback() {
         override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
             super.onDismissed(transientBottomBar, event)
@@ -219,25 +251,30 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
         item?.let {
             it.amount = binding.plannedAmount?.text.toString().toFloat()
 
-
+            val datePaid = getCalendarForDate(binding.actualDate?.text.toString())
+            if(datePaid != null) {
+                val amountPaid = binding.actualAmount?.text.toString()
+                if(amountPaid.isNotEmpty()) {
+                    model.update(it,ActualTxn(it.txn.txnId,datePaid,amountPaid.toFloat()))
+                }
+            }
+            else {
                 model.update(it)
+            }
+
                 //findNavController().navigateUp()
                 model.message.observe(viewLifecycleOwner) { result ->
                     if(result =="OK"){
 
 
-                        binding.root?.let { v ->
+                        binding.root.let { v ->
                             Snackbar.make(v, "Successfully saved", Snackbar.LENGTH_SHORT)
                                 .addCallback(Bailor())
                                 .show()
                         }
                     }
                 }
-
             }
-
-
-
     }
 
 
@@ -252,8 +289,10 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
                 toShow = getTotalPaid().toString()
                 binding.plannedDate?.text = getString(R.string.lbl_paid)
                 binding.plannedDate?.isEnabled = false
-                binding.actualDate?.text = getString(R.string.lbl_paid)
-                binding.actualDate?.isEnabled = false
+                if(!it.category.openEnded) {
+                    binding.actualDate?.text = getString(R.string.lbl_paid)
+                    binding.actualDate?.isEnabled = false
+                }
 
             }
             else {
@@ -268,7 +307,6 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
 
             (binding.categoryMenu!!.editText as? AutoCompleteTextView)?.setText(it.category.name,false)
         }
-
         var toto=notes
         if(actualTxns != null) {
             for(line in actualTxns!!) {

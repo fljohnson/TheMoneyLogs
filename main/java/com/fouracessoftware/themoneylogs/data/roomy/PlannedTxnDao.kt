@@ -18,12 +18,14 @@ interface PlannedTxnDao {
 
     @Transaction @Query("SELECT * FROM planned")
     fun getAllTxnsWithCategory(): Flow<List<TxnWithCategory>>
-    @Transaction
-    @Query("SELECT * FROM planned WHERE txn_id = :id")
+
+    @Transaction @Query("SELECT * FROM planned WHERE txn_id = :id")
     fun getTxnWithCategory(id: Long): Flow<TxnWithCategory>
+
     @Query("SELECT max(txn_id) from PLANNED")
     fun getMaxId():Long
 
     @Update
     fun update(txn: PlannedTxn,category: Category)
+
 }

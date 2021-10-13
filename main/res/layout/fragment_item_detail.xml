@@ -111,7 +111,7 @@
                 android:ems="10"
                 android:hint="@string/lbl_actual_amount"
                 android:importantForAutofill="no"
-                android:inputType="number"
+                android:inputType="number|numberDecimal"
                 android:minHeight="48dp"
                 android:selectAllOnFocus="false"
                 android:singleLine="true"
@@ -178,12 +178,12 @@
                 android:layout_weight="1.1"
                 android:ems="10"
                 android:hint="@string/lbl_planned_amount"
-                android:textColorHint="#757575"
                 android:importantForAutofill="no"
-                android:inputType="number"
+                android:inputType="number|numberDecimal"
                 android:minHeight="48dp"
                 android:selectAllOnFocus="false"
-                android:singleLine="true" />
+                android:singleLine="true"
+                android:textColorHint="#757575" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/planned_date"
