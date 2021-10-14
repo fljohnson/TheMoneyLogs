@@ -283,10 +283,10 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
         item?.let {
            // itemDetailTextView.text = it.getNotes() TODO
          //   val fullAmt = it.amount
-            val toShow: String
+            val toShow = it.amount.toString()
             val remainingAmt = getOutstandingAmount(it)
             if(remainingAmt <=0f) {
-                toShow = getTotalPaid().toString()
+                //toShow = getTotalPaid().toString()
                 binding.plannedDate?.text = getString(R.string.lbl_paid)
                 binding.plannedDate?.isEnabled = false
                 if(!it.category.openEnded) {
@@ -296,12 +296,13 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
 
             }
             else {
-                toShow = getOutstandingAmount(it).toString()
+
                 if(it.dateDue().trim().isNotEmpty()) {
                     binding.plannedDate?.text = it.dateDue()
                 }
                 binding.plannedDate?.isEnabled = true
             }
+            binding.paidAmount?.text = getString(R.string.paid_so_far,getTotalPaid())
             binding.plannedAmount?.setText(toShow)
             binding.payee?.setText(it.payee())
 
@@ -331,7 +332,7 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
     }
     private fun getOutstandingAmount(it: TxnWithCategory): Float {
         var amt = it.getOutstandingAmount()
-        amt -=getTotalPaid()
+        //amt -=getTotalPaid()
         return amt
     }
 

@@ -16,8 +16,7 @@
     <fragment
         android:id="@+id/item_detail_fragment"
         android:name="com.fouracessoftware.themoneylogs.ItemDetailFragment"
-        android:label="item_detail"
-        tools:layout="@layout/fragment_item_detail">
+        android:label="item_detail">
         <argument
             android:name="item_id"
             app:argType="long" />

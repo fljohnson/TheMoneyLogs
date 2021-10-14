@@ -69,9 +69,31 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="128dp">
+
+        <ScrollView
+            android:id="@+id/item_prior_notes"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="#EDE7F6"
+            android:minHeight="64sp"
+            android:outlineProvider="none"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_max="128sp"
+            app:layout_constraintHeight_min="128sp"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/item_notes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+        </ScrollView>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/category_menu"
@@ -95,6 +117,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
+            android:id="@+id/actualsLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -136,30 +159,36 @@
             android:minHeight="48dp"
             android:minLines="1"
             android:textAlignment="gravity"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constrainedHeight="true"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/category_menu" />
 
         <ScrollView
-            android:id="@+id/item_prior_notes"
+            android:id="@+id/item_new_notes"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_marginTop="32dp"
             android:background="#EDE7F6"
             android:minHeight="64sp"
             android:outlineProvider="none"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHeight_max="64sp"
-            app:layout_constraintHeight_min="64sp"
+            app:layout_constraintHeight_max="128sp"
+            app:layout_constraintHeight_min="128sp"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout">
+            app:layout_constraintTop_toBottomOf="@id/actualsLayout">
 
-            <com.google.android.material.textview.MaterialTextView
-                android:id="@+id/item_notes"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/item_addenda"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1" />
+                android:hint="@string/lbl_new_notes"
+                android:inputType="textWebEditText|textMultiLine"
+                android:minHeight="48dp"
+                android:singleLine="false"
+                android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                android:textColorHint="#616161" />
         </ScrollView>
 
         <LinearLayout
@@ -170,12 +199,22 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/payee">
 
+            <TextView
+                android:id="@+id/paid_amount"
+                android:layout_width="30dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".5"
+                android:singleLine="true"
+                android:text="@string/paid_so_far"
+                android:textAlignment="viewEnd"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/planned_amount"
-                android:layout_width="match_parent"
+                android:layout_width="58dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
-                android:layout_weight="1.1"
+                android:layout_weight=".5"
                 android:ems="10"
                 android:hint="@string/lbl_planned_amount"
                 android:importantForAutofill="no"
@@ -183,6 +222,7 @@
                 android:minHeight="48dp"
                 android:selectAllOnFocus="false"
                 android:singleLine="true"
+                android:textAlignment="viewStart"
                 android:textColorHint="#757575" />
 
             <com.google.android.material.button.MaterialButton
