@@ -138,8 +138,11 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
             //the MaterialDatePicker turned up off by a day, so we'll goose it in (FLJ, 10/12/2021)
             calendar.timeInMillis = 24*3600000 + datePicker.selection!!
             //chosenDate = "${calendar.get(Calendar.YEAR)}-${1+calendar.get(Calendar.MONTH)}-${1+calendar.get(Calendar.DAY_OF_MONTH)}"
-            if(isPlanning)
+            if(isPlanning) {
+                if (item == null)
+                    dateBtn?.text = model.formatDate(calendar)
                 item?.setDateDue(calendar)
+            }
             else
                 dateBtn?.text = model.formatDate(calendar)
             updateContent()
