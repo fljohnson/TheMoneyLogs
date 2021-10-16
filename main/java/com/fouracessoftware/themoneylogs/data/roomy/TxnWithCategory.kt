@@ -1,6 +1,7 @@
 package com.fouracessoftware.themoneylogs.data.roomy
 
 import android.icu.text.SimpleDateFormat
+import android.icu.util.Calendar
 
 
 import androidx.room.Embedded
@@ -11,18 +12,18 @@ data class TxnWithCategory(
     @Embedded
     val txn:PlannedTxn,
     @Relation(parentColumn = "category_id",entityColumn = "id")
-    var category:Category,
+    override var category: Category?,
     @Relation(parentColumn = "txn_id",entityColumn = "xid")
     val actuals:List<ActualTxn>
-) {
-    val transactionTitle: CharSequence
+): TxnUnit() {
+    override val transactionTitle: CharSequence
         get() = run {
         val rv:String = if(amount==null) {
             "(Unknown amount)"
         } else {
             "${amount!!}"
         }
-        "$rv for ${category.name} on ${dateDue()}"
+        "$rv for ${category!!.name} on ${dateDue()}"
     }
 
 
@@ -39,15 +40,16 @@ data class TxnWithCategory(
         return rv
     }
 
-    var amount:Float? get() { return txn.amount}
-    set(value) {txn.amount = value}
+    override var amount:Float? get() { return txn.amount}
+     set(value) {txn.amount = value}
 
 
-    fun payee(): String {
+    override var payee: String get(){
         return txn.payee
     }
+    set(value) {txn.payee = value}
 
-    fun dateDue(): String {
+    override fun dateDue(): String {
         if(txn.dateDue == null)
         {
             return "[Undated]"
@@ -56,10 +58,24 @@ data class TxnWithCategory(
 
     }
 
+    override fun setDateDue(date: Calendar) {
+        txn.dateDue = date
+    }
+
 
     companion object {
         private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     }
+
+
+
+    override var categoryId: Int
+        get() = txn.categoryId
+        set(value) {txn.categoryId = value}
+
+
+
+
 }
 
 

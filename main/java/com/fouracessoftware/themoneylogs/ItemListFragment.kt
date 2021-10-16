@@ -97,19 +97,9 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
          */
         storedItemOnClickListener = View.OnClickListener { itemView ->
             val item = itemView.tag as TxnWithCategory
-            model.select(item)
-            (requireActivity() as AppCompatActivity).supportActionBar?.hide()
-            val bundle = Bundle()
-            bundle.putLong(
-                    ItemDetailFragment.ARG_ITEM_ID,
-                    item.txn.txnId
-            )
-            if (itemDetailFragmentContainer != null) {
-                itemDetailFragmentContainer.findNavController()
-                        .navigate(R.id.fragment_item_detail, bundle)
-            } else {
-                itemView.findNavController().navigate(R.id.show_item_detail, bundle)
-            }
+
+            openDetail(itemDetailFragmentContainer,item.txn.txnId,itemView)
+
         }
 
 
@@ -128,7 +118,28 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
             ).show()
             true
         }
-       // setupRecyclerView(recyclerView, onClickListener, onContextClickListener)
+
+        binding.btnNewPlanned?.setOnClickListener{
+            openDetail(itemDetailFragmentContainer,-1L,it)
+        }
+    }
+
+    private fun openDetail(itemDetailFragmentContainer:View?,txnId: Long, itemView: View) {
+        val bundle = Bundle()
+        bundle.putLong(
+            ItemDetailFragment.ARG_ITEM_ID,
+            txnId
+        )
+
+      //  val itemDetailFragmentContainer: View? = view.findViewById(R.id.item_detail_nav_container)
+
+        (requireActivity() as AppCompatActivity).supportActionBar?.hide()
+        if (itemDetailFragmentContainer != null) {
+            itemDetailFragmentContainer.findNavController()
+                .navigate(R.id.fragment_item_detail, bundle)
+        } else {
+            itemView.findNavController().navigate(R.id.show_item_detail, bundle)
+        }
     }
 
     private fun setupRecyclerView(
@@ -161,7 +172,7 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
         @SuppressLint("SetTextI18n")
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = values[position]
-            val categoryName = item.category.name
+            val categoryName = item.category!!.name
 
             if(item.getOutstandingAmount() <0.01f) {
                 (item.amount.toString() + " for " + categoryName +  " PAID").also { holder.idView.text = it }
@@ -172,7 +183,7 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
                     holder.idView.text = it
                 }
             }
-            item.payee().also { holder.contentView.text = it }
+            item.payee.also { holder.contentView.text = it }
 
             with(holder.itemView) {
                 tag = item

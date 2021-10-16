@@ -11,10 +11,6 @@ import kotlinx.coroutines.launch
 import java.util.*
 
 class TxnListViewModel: ViewModel() {
-    private val selected = MutableLiveData<TxnWithCategory>()
-    fun select(item: TxnWithCategory) {
-        selected.value = item
-    }
 
     var message = MutableLiveData("")
     val txnList: LiveData<List<TxnWithCategory>> = CentralContent.plannedTxnDao.getAllTxnsWithCategory().asLiveData()
@@ -29,12 +25,14 @@ class TxnListViewModel: ViewModel() {
         return CentralContent.actualTxnDao.getActualsForTxn(id).asLiveData()
     }
 
-    fun update(item: TxnWithCategory, actual: ActualTxn? = null){
+    fun update(item: TxnWithCategory, actual: ActualTxn? = null, note: PlanNote? = null){
         CoroutineScope(Dispatchers.IO).launch {
             @Transaction
                 if(actual!=null)
                     CentralContent.actualTxnDao.insertActualTxn(actual)
-                CentralContent.plannedTxnDao.update(item.txn,item.category)
+            item.category?.let { CentralContent.plannedTxnDao.update(item.txn, it) }
+                if(note!=null)
+                    CentralContent.planNoteDao.insertNote(note)
 
             message.postValue("OK")
         }
@@ -45,6 +43,29 @@ class TxnListViewModel: ViewModel() {
     fun formatDate(cal: Calendar?): CharSequence? {
         return dateFormat.format(cal)
     }
+
+    fun insert(txn: PlannedTxn, category: Category, note: PlanNote?, actual: ActualTxn?) {
+        CoroutineScope(Dispatchers.IO).launch {
+            txn.categoryId = category.categoryId //belt and suspenders
+            CentralContent.plannedTxnDao.insertTxnWithCategory(txn,category)
+            val txnId = CentralContent.plannedTxnDao.getMaxId()
+
+            @Transaction
+            if(note != null){
+                val planNote = PlanNote(xid=txnId,note.content)
+                CentralContent.planNoteDao.insertNote(planNote)
+            }
+            if(actual != null){
+                val actualTxn = ActualTxn(xid=txnId,
+                    datePaid=actual.datePaid,
+                    amount= actual.amount)
+                CentralContent.actualTxnDao.insertActualTxn(actualTxn)
+            }
+
+            message.postValue("OK")
+        }
+    }
+
     companion object {
         private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     }

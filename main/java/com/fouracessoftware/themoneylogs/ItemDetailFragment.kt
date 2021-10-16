@@ -14,9 +14,7 @@ import android.widget.TextView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import com.fouracessoftware.themoneylogs.data.roomy.ActualTxn
-import com.fouracessoftware.themoneylogs.data.roomy.Category
-import com.fouracessoftware.themoneylogs.data.roomy.TxnWithCategory
+import com.fouracessoftware.themoneylogs.data.roomy.*
 import com.fouracessoftware.themoneylogs.databinding.FragmentItemDetailBinding
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -42,8 +40,9 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
     /**
      * The placeholder content this fragment is presenting.
      */
-    private var item: TxnWithCategory? = null
+    private var item: TxnUnit? = null
     private var changeCounter:TxnWithCategory? = null
+    private var categoryIndex:Int = -1
 
     private lateinit var itemDetailTextView: TextView
     private var toolbarLayout: CollapsingToolbarLayout? = null
@@ -66,9 +65,15 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
                 // Load the placeholder content specified by the fragment
                 // arguments. In a real-world scenario, use a Loader
                 // to load content from a content provider.
-                model.getTxn(it.getLong(ARG_ITEM_ID)).observe(viewLifecycleOwner, {
+                val txnID = it.getLong(ARG_ITEM_ID)
+                if(txnID == -1L) {
+                    //item = ProtoTxnWithCategory()
+                    changeCounter = null
+                }
+
+                model.getTxn(txnID).observe(viewLifecycleOwner, {
                         selected_item -> item = selected_item
-                        changeCounter = item?.copy() //apparently a deep copy
+                        changeCounter = (item as TxnWithCategory?)?.copy() //apparently a deep copy
                     // Update the UI
                     updateContent()
                 })
@@ -134,7 +139,7 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
             calendar.timeInMillis = 24*3600000 + datePicker.selection!!
             //chosenDate = "${calendar.get(Calendar.YEAR)}-${1+calendar.get(Calendar.MONTH)}-${1+calendar.get(Calendar.DAY_OF_MONTH)}"
             if(isPlanning)
-                item?.txn?.dateDue = calendar
+                item?.setDateDue(calendar)
             else
                 dateBtn?.text = model.formatDate(calendar)
             updateContent()
@@ -209,25 +214,41 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
         (binding.categoryMenu!!.editText as AutoCompleteTextView).setOnItemClickListener { _: AdapterView<*>, _: View, i: Int, _: Long ->
 
             val adapteur = (binding.categoryMenu!!.editText as AutoCompleteTextView).adapter as CategoryAdapter
-            item?.txn?.categoryId = adapteur.getItem(i)?.categoryId!!
-            item?.category = adapteur.getItem(i)!!
-            //and finally
+            categoryIndex = i
+            item?.let {
+                it.category = adapteur.getItem(i)!!
+                it.categoryId = it.category!!.categoryId
+            }
+                    //and finally
             updateContent()
         }
 
-        updateContent()
+
 
 
         return rootView
     }
 
     private fun diffFromOriginal(): Boolean {
+
         changeCounter?.let {
+            //did the user add a note?
+            if(binding.itemAddenda?.text!=null) {
+                if(binding.itemAddenda?.text!!.trim().isNotEmpty())
+                    return true
+            }
+            //if the user blanked out the payee field, don't count it as a change
+            val typedPayee = binding.payee?.text!!.trim().toString() //so we'll be comparing apples to apples
+            if(typedPayee.isNotEmpty()) {
+                if(it.payee != typedPayee) {
+                    return true
+                }
+            }
             if( !item?.category?.openEnded!!) {
                 if (it.amount.toString() != binding.plannedAmount?.text.toString())
                     return true
             }
-            if(item?.category?.categoryId != it.category.categoryId)
+            if(item?.category?.categoryId != it.category?.categoryId)
                 return true
             val datePaid = getCalendarForDate(binding.actualDate?.text.toString())
             if(datePaid != null) {
@@ -238,6 +259,8 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
             }
         }
 
+
+
         return false
     }
 
@@ -247,55 +270,134 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
             findNavController().navigateUp()
         }
     }
-    private fun beginSave() {
-        item?.let {
-            it.amount = binding.plannedAmount?.text.toString().toFloat()
 
+    private fun reportError(msg:String) {
+        binding.root.let { v ->
+            Snackbar.make(v, msg, Snackbar.LENGTH_SHORT)
+                .show()
+        }
+    }
+    private fun beginSave() {
+        if(item == null)
+        {
+            //get the final values from the UI elements
+            val amountStr = binding.plannedAmount?.text.toString()
+
+            val amount = if(amountStr.isNullOrBlank()) {
+                0f
+            }
+            else
+            {
+                amountStr.toFloat()
+            }
+
+            val payee = binding.payee?.text!!.trim().toString()
+            if(payee.isBlank()) {
+                reportError("Please enter a payee or payor")
+                return
+            }
+            val dateDue = binding.plannedDate?.text?.let { getCalendarForDate(it) }
+            val adapteur = (binding.categoryMenu!!.editText as AutoCompleteTextView).adapter as CategoryAdapter
+
+            if(categoryIndex == -1)
+            {
+                reportError("Please choose a category")
+                return
+            }
+
+            val category = adapteur.getItem(categoryIndex)!!
+            val txn = PlannedTxn(amount,payee,dateDue,category.categoryId)
+            var actual:ActualTxn? = null
             val datePaid = getCalendarForDate(binding.actualDate?.text.toString())
             if(datePaid != null) {
                 val amountPaid = binding.actualAmount?.text.toString()
                 if(amountPaid.isNotEmpty()) {
-                    model.update(it,ActualTxn(it.txn.txnId,datePaid,amountPaid.toFloat()))
+                    actual = ActualTxn(-1L,datePaid,amountPaid.toFloat())
                 }
             }
-            else {
-                model.update(it)
+
+            var noteToSave: PlanNote? = null
+            //did the user add a note?
+            if(binding.itemAddenda?.text!=null) {
+                val note = binding.itemAddenda?.text!!.trim().toString()
+                if(note.isNotEmpty())
+                    noteToSave = PlanNote(-1L,note)
             }
+            /*
+            since we don't yet have a real txnId value to plug into actual and noteToSave
+            (one or both possibly being null), we'll send what we have to the viewModel to straighten things out
+            */
+            model.insert(txn,category,noteToSave,actual)
 
-                //findNavController().navigateUp()
-                model.message.observe(viewLifecycleOwner) { result ->
-                    if(result =="OK"){
+            model.message.observe(viewLifecycleOwner) { result ->
+                if(result =="OK"){
 
 
-                        binding.root.let { v ->
-                            Snackbar.make(v, "Successfully saved", Snackbar.LENGTH_SHORT)
-                                .addCallback(Bailor())
-                                .show()
-                        }
+                    binding.root.let { v ->
+                        Snackbar.make(v, "Successfully saved", Snackbar.LENGTH_SHORT)
+                            .addCallback(Bailor())
+                            .show()
                     }
                 }
             }
+            return
+        }
+        (item as TxnWithCategory).let {
+            it.amount = binding.plannedAmount?.text.toString().toFloat()
+            val typedPayee = binding.payee?.text!!.trim().toString()
+            if(typedPayee.isNotEmpty()) {
+                it.payee = typedPayee
+            }
+            var noteToSave: PlanNote? = null
+            //did the user add a note?
+            if(binding.itemAddenda?.text!=null) {
+                val note = binding.itemAddenda?.text!!.trim().toString()
+                if(note.isNotEmpty())
+                    noteToSave = PlanNote(it.txn.txnId,note)
+            }
+            val datePaid = getCalendarForDate(binding.actualDate?.text.toString())
+            if(datePaid != null) {
+                val amountPaid = binding.actualAmount?.text.toString()
+                if(amountPaid.isNotEmpty()) {
+                    model.update(it,ActualTxn(it.txn.txnId,datePaid,amountPaid.toFloat()),noteToSave)
+                }
+            } else {
+                model.update(it,note = noteToSave)
+            }
+
+            //findNavController().navigateUp()
+            model.message.observe(viewLifecycleOwner) { result ->
+                if(result =="OK"){
+
+
+                    binding.root.let { v ->
+                        Snackbar.make(v, "Successfully saved", Snackbar.LENGTH_SHORT)
+                            .addCallback(Bailor())
+                            .show()
+                    }
+                }
+            }
+        }
     }
 
 
     private fun updateContent() {
         binding.txnTitle?.text = item?.transactionTitle
-        item?.let {
-           // itemDetailTextView.text = it.getNotes() TODO
-         //   val fullAmt = it.amount
+        (item as TxnWithCategory?)?.let {
+            // itemDetailTextView.text = it.getNotes() TODO
+            //   val fullAmt = it.amount
             val toShow = it.amount.toString()
             val remainingAmt = getOutstandingAmount(it)
             if(remainingAmt <=0f) {
                 //toShow = getTotalPaid().toString()
                 binding.plannedDate?.text = getString(R.string.lbl_paid)
                 binding.plannedDate?.isEnabled = false
-                if(!it.category.openEnded) {
+                if(!it.category?.openEnded!!) {
                     binding.actualDate?.text = getString(R.string.lbl_paid)
                     binding.actualDate?.isEnabled = false
                 }
 
-            }
-            else {
+            } else {
 
                 if(it.dateDue().trim().isNotEmpty()) {
                     binding.plannedDate?.text = it.dateDue()
@@ -304,9 +406,9 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
             }
             binding.paidAmount?.text = getString(R.string.paid_so_far,getTotalPaid())
             binding.plannedAmount?.setText(toShow)
-            binding.payee?.setText(it.payee())
+            binding.payee?.setText(it.payee)
 
-            (binding.categoryMenu!!.editText as? AutoCompleteTextView)?.setText(it.category.name,false)
+            (binding.categoryMenu!!.editText as? AutoCompleteTextView)?.setText(it.category?.name,false)
         }
         var toto=notes
         if(actualTxns != null) {
@@ -331,9 +433,8 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
         return amt
     }
     private fun getOutstandingAmount(it: TxnWithCategory): Float {
-        var amt = it.getOutstandingAmount()
         //amt -=getTotalPaid()
-        return amt
+        return it.getOutstandingAmount()
     }
 
     companion object {
