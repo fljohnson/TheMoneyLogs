@@ -21,4 +21,7 @@
     <string name="lbl_save">Save</string>
     <string name="lbl_paid">Paid</string>
     <string name="paid_so_far">%1$4.2f paid of  </string>
+    <string name="choose_month">Other month</string>
+    <string name="current_month">Current Month</string>
+    <string name="copy_month">Copy Month</string>
 </resources>

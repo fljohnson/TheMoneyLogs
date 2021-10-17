@@ -75,9 +75,55 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
     ): View {
         model.txnList.observe(viewLifecycleOwner,this)
         _binding = FragmentItemListBinding.inflate(inflater, container, false)
+
+
+        binding.toolbar?.setOnMenuItemClickListener {
+            when(it.itemId) {
+                R.id.action_copy -> {
+                    startCopyDlg()
+                    true
+                }
+                R.id.action_monthfilter -> {
+                    startMonthfilterDlg()
+                    true
+                }
+                R.id.action_currentmonth -> {
+                    clearMonthFilter()
+                    true
+                }
+                else -> {
+                    false
+                }
+            }
+        }
+
         return binding.root
 
+    }
 
+    private fun startCopyDlg() {
+        Snackbar.make(binding.root.rootView,"Copy is coming",Snackbar.LENGTH_SHORT)
+            .show()
+    }
+
+    private fun startMonthfilterDlg() {
+        /*iff the user goes through with it
+        Hide the menuitem
+        Show the "current month" item
+         */
+        binding.toolbar?.menu?.findItem(R.id.action_monthfilter)?.isVisible = false
+        binding.toolbar?.menu?.findItem(R.id.action_currentmonth)?.isVisible = true
+        Snackbar.make(binding.root.rootView,"Filter is coming",Snackbar.LENGTH_SHORT)
+            .show()
+    }
+
+    private fun clearMonthFilter() {
+        //no bones to be made here
+
+        binding.toolbar?.menu?.findItem(R.id.action_monthfilter)?.isVisible = true
+        binding.toolbar?.menu?.findItem(R.id.action_currentmonth)?.isVisible = false
+        Snackbar.make(binding.root.rootView,"Back to normal",Snackbar.LENGTH_SHORT)
+            .show()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

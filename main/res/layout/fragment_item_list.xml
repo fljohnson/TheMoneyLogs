@@ -11,7 +11,9 @@
         android:id="@+id/appbar"
 
         android:layout_height="192dp"
-        android:layout_width="match_parent">
+        android:layout_width="match_parent"
+
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
@@ -24,8 +26,11 @@
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
+                android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:layout_width="match_parent"></androidx.appcompat.widget.Toolbar>
+                app:menu="@menu/list_action_bar"
+                app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light"
+                app:titleTextAppearance="@style/TextAppearance.AppCompat.Display1" />
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -66,6 +71,6 @@
         android:contentDescription="@string/lbl_add_xaction"
         android:src="@android:drawable/ic_input_add"
         app:layout_anchor="@+id/holder"
-        app:layout_anchorGravity="top|end" />"
+        app:layout_anchorGravity="top|end" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
