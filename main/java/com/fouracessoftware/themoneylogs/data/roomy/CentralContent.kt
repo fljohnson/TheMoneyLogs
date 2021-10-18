@@ -3,6 +3,7 @@ package com.fouracessoftware.themoneylogs.data.roomy
 
 
 import android.icu.util.Calendar
+import android.icu.util.TimeZone
 import androidx.lifecycle.MutableLiveData
 import com.fouracessoftware.themoneylogs.MainApplication
 import com.fouracessoftware.themoneylogs.data.PrototypeContent
@@ -109,7 +110,7 @@ object CentralContent  {
     }
 
     private fun getCalendarFor(ymd:String):Calendar {
-        val rv=Calendar.getInstance()
+        val rv=Calendar.getInstance(TimeZone.GMT_ZONE)
 
         val div1 = ymd.indexOf("-")
         val div2 = ymd.lastIndexOf("-")

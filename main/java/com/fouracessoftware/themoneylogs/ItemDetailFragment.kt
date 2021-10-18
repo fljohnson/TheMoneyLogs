@@ -3,6 +3,7 @@ package com.fouracessoftware.themoneylogs
 import android.content.Context
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
+import android.icu.util.TimeZone
 import android.os.Bundle
 import android.view.*
 import android.widget.AdapterView
@@ -73,7 +74,17 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
 
                 model.getTxn(txnID).observe(viewLifecycleOwner, {
                         selected_item -> item = selected_item
-                        changeCounter = (item as TxnWithCategory?)?.copy() //apparently a deep copy
+                       // changeCounter = (item as TxnWithCategory?)?.copy() //apparently a deep copy
+                    (item as TxnWithCategory).let {
+
+                        changeCounter = TxnWithCategory(
+                            it.txn.copy(),
+                            it.category,
+                            it.actuals
+
+                        )
+                    }
+
                     // Update the UI
                     updateContent()
                 })
@@ -134,9 +145,10 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
                 .build()
         //if the user commits to the date, get the value
         datePicker.addOnPositiveButtonClickListener {
-            val calendar = Calendar.getInstance()
-            //the MaterialDatePicker turned up off by a day, so we'll goose it in (FLJ, 10/12/2021)
-            calendar.timeInMillis = 24*3600000 + datePicker.selection!!
+            //the MaterialDatePicker apparently "thinks" in UTC (FLJ, 10/18/2021)
+            val calendar = Calendar.getInstance(TimeZone.GMT_ZONE)
+            calendar.timeInMillis =  it
+
             //chosenDate = "${calendar.get(Calendar.YEAR)}-${1+calendar.get(Calendar.MONTH)}-${1+calendar.get(Calendar.DAY_OF_MONTH)}"
             if(isPlanning) {
                 if (item == null)
@@ -156,7 +168,7 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
     }
 
     private fun getCalendarForDate(textdate:CharSequence):Calendar? {
-        val outdate = Calendar.getInstance()
+        val outdate = Calendar.getInstance(TimeZone.GMT_ZONE)
         val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
 
         //now here's a neat Kotlin construct: a try-catch block can be an expression
@@ -251,8 +263,15 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
                 if (it.amount.toString() != binding.plannedAmount?.text.toString())
                     return true
             }
+
             if(item?.category?.categoryId != it.category?.categoryId)
                 return true
+
+            //did the user change the Due Date?
+
+            if(item?.dateDue() != it.dateDue() ) {
+                return true
+            }
             val datePaid = getCalendarForDate(binding.actualDate?.text.toString())
             if(datePaid != null) {
                 val amountPaid = binding.actualAmount?.text.toString()
