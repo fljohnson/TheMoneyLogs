@@ -3,6 +3,9 @@ package com.fouracessoftware.themoneylogs
 import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipDescription
+import android.icu.text.SimpleDateFormat
+import android.icu.util.Calendar
+import android.icu.util.TimeZone
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.LayoutInflater
@@ -21,7 +24,9 @@ import com.fouracessoftware.themoneylogs.data.PrototypeContent
 import com.fouracessoftware.themoneylogs.data.roomy.TxnWithCategory
 import com.fouracessoftware.themoneylogs.databinding.FragmentItemListBinding
 import com.fouracessoftware.themoneylogs.databinding.ItemListContentBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import java.util.*
 
 /**
  * A Fragment representing a list of Pings. This fragment
@@ -35,6 +40,7 @@ import com.google.android.material.snackbar.Snackbar
 class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
     private lateinit var storedItemOnClickListener: View.OnClickListener
     private lateinit var storedOnContextClickListener:View.OnContextClickListener
+
 
     /**
      * Method to intercept global key events in the
@@ -107,23 +113,63 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
     }
 
     private fun startMonthfilterDlg() {
-        /*iff the user goes through with it
-        Hide the menuitem
-        Show the "current month" item
-         */
+        val moFo = SimpleDateFormat("LLL yyyy", Locale.getDefault())
+        val visuals = arrayOf("","","","","","")
+        var choice = 2
+        val datelets :Array<Calendar?> = Array(6) { null }
+        for(i in (1..3)) {
+            val cal = Calendar.getInstance(TimeZone.GMT_ZONE) //now, in UTC terms
+            cal.add(Calendar.MONTH,-i)
+            datelets[3-i]=cal
+        }
+        for(i in (1..3)) {
+            val cal = Calendar.getInstance(TimeZone.GMT_ZONE) //now, in UTC terms
+            cal.add(Calendar.MONTH,+i)
+            datelets[2+i]=cal
+        }
+
+        for(i in 0..5) {
+            visuals[i] =(moFo.format(datelets[i]))
+        }
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(resources.getString(R.string.lbl_choose_month))
+            .setNeutralButton(resources.getString(R.string.lbl_cancel)) { _, _ ->
+                choice = -1
+            }
+            .setPositiveButton(resources.getString(R.string.lbl_ok)) { _, _ ->
+                setViewedMonth(datelets[choice])
+            }
+            // Single-choice items (initialized with checked item)
+            .setSingleChoiceItems(visuals,choice) { _, which ->
+                // Respond to item chosen
+                choice = which
+            }
+            .show()
+
+
+    }
+
+    private fun setViewedMonth(calendar: Calendar?) {
+
+        /*Okay, the user went through with a "view other month", so
+                Hide the menuitem
+                Show the "current month" item
+                 */
+
         binding.toolbar?.menu?.findItem(R.id.action_monthfilter)?.isVisible = false
         binding.toolbar?.menu?.findItem(R.id.action_currentmonth)?.isVisible = true
-        Snackbar.make(binding.root.rootView,"Filter is coming",Snackbar.LENGTH_SHORT)
-            .show()
+        //now get the chosen month's data and make ready to show it
+        model.getTxns(calendar)
+        model.txnList.observe(viewLifecycleOwner,this)
     }
 
     private fun clearMonthFilter() {
+        model.getTxns(null)
+        model.txnList.observe(viewLifecycleOwner,this)
         //no bones to be made here
 
         binding.toolbar?.menu?.findItem(R.id.action_monthfilter)?.isVisible = true
         binding.toolbar?.menu?.findItem(R.id.action_currentmonth)?.isVisible = false
-        Snackbar.make(binding.root.rootView,"Back to normal",Snackbar.LENGTH_SHORT)
-            .show()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

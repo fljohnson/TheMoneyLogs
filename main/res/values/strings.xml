@@ -24,4 +24,7 @@
     <string name="choose_month">Other month</string>
     <string name="current_month">Current Month</string>
     <string name="copy_month">Copy Month</string>
+    <string name="lbl_cancel">Cancel</string>
+    <string name="lbl_choose_month">Which prior month is of interest?</string>
+    <string name="lbl_ok">OK</string>
 </resources>

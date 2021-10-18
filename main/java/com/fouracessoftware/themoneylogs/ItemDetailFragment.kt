@@ -70,12 +70,14 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
                 if(txnID == -1L) {
                     //item = ProtoTxnWithCategory()
                     changeCounter = null
+                    return
+
                 }
 
                 model.getTxn(txnID).observe(viewLifecycleOwner, {
                         selected_item -> item = selected_item
                        // changeCounter = (item as TxnWithCategory?)?.copy() //apparently a deep copy
-                    (item as TxnWithCategory).let {
+                    (item as TxnWithCategory)?.let {
 
                         changeCounter = TxnWithCategory(
                             it.txn.copy(),
@@ -245,6 +247,9 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
     }
 
     private fun diffFromOriginal(): Boolean {
+        if(changeCounter == null) {
+            return true
+        }
 
         changeCounter?.let {
             //did the user add a note?
@@ -305,7 +310,7 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
             //get the final values from the UI elements
             val amountStr = binding.plannedAmount?.text.toString()
 
-            val amount = if(amountStr.isNullOrBlank()) {
+            val amount = if(amountStr.isBlank()) {
                 0f
             }
             else

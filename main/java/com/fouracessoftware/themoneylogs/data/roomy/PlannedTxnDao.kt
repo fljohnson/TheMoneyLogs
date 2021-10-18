@@ -1,5 +1,6 @@
 package com.fouracessoftware.themoneylogs.data.roomy
 
+import android.icu.util.Calendar
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
@@ -18,6 +19,9 @@ interface PlannedTxnDao {
 
     @Transaction @Query("SELECT * FROM planned")
     fun getAllTxnsWithCategory(): Flow<List<TxnWithCategory>>
+
+    @Transaction @Query("SELECT * FROM planned WHERE due_date >= :firstDate AND due_date <= :lastDate")
+    fun getRangedTxnsWithCategory(firstDate:Calendar,lastDate:Calendar): Flow<List<TxnWithCategory>>
 
     @Transaction @Query("SELECT * FROM planned WHERE txn_id = :id")
     fun getTxnWithCategory(id: Long): Flow<TxnWithCategory>

@@ -2,6 +2,7 @@ package com.fouracessoftware.themoneylogs
 
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
+import android.icu.util.TimeZone
 import androidx.lifecycle.*
 import androidx.room.Transaction
 import com.fouracessoftware.themoneylogs.data.roomy.*
@@ -13,7 +14,7 @@ import java.util.*
 class TxnListViewModel: ViewModel() {
 
     var message = MutableLiveData("")
-    val txnList: LiveData<List<TxnWithCategory>> = CentralContent.plannedTxnDao.getAllTxnsWithCategory().asLiveData()
+    var txnList: LiveData<List<TxnWithCategory>> = CentralContent.plannedTxnDao.getAllTxnsWithCategory().asLiveData()
     val categoryList: LiveData<List<Category>> = CentralContent.categoryDao.getAllCategories().asLiveData()
     fun getTxn(id:Long):LiveData<TxnWithCategory> {
         return CentralContent.plannedTxnDao.getTxnWithCategory(id).asLiveData()
@@ -64,6 +65,27 @@ class TxnListViewModel: ViewModel() {
 
             message.postValue("OK")
         }
+    }
+
+    fun getTxns(calendar: Calendar?) {
+        var start=Calendar.getInstance(TimeZone.GMT_ZONE)
+        val end=Calendar.getInstance(TimeZone.GMT_ZONE)
+
+        if(calendar != null) {
+            start.timeInMillis= calendar.timeInMillis
+            end.timeInMillis = calendar.timeInMillis
+        }
+
+        start.set(Calendar.DAY_OF_MONTH,1)
+        end.add(Calendar.MONTH,1)
+        end.set(Calendar.DAY_OF_MONTH,0)
+
+        txnList = CentralContent.plannedTxnDao.getRangedTxnsWithCategory(start,end).asLiveData()
+
+
+        println(dateFormat.format(start))
+        println(dateFormat.format(end))
+
     }
 
     companion object {
