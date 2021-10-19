@@ -11,8 +11,7 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
@@ -25,7 +24,7 @@ import com.fouracessoftware.themoneylogs.data.roomy.TxnWithCategory
 import com.fouracessoftware.themoneylogs.databinding.FragmentItemListBinding
 import com.fouracessoftware.themoneylogs.databinding.ItemListContentBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textfield.TextInputLayout
 import java.util.*
 
 /**
@@ -40,7 +39,6 @@ import java.util.*
 class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
     private lateinit var storedItemOnClickListener: View.OnClickListener
     private lateinit var storedOnContextClickListener:View.OnContextClickListener
-
 
     /**
      * Method to intercept global key events in the
@@ -108,8 +106,56 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
     }
 
     private fun startCopyDlg() {
-        Snackbar.make(binding.root.rootView,"Copy is coming",Snackbar.LENGTH_SHORT)
+        //val v = layoutInflater.inflate(R.layout.month_range_dlg,this.requireParentFragment())
+        //val fromMenu = v.findViewById<MaterialAutoCompleteTextView>(R.id.from_list)
+        val fromMenu:AutoCompleteTextView?
+        val toMenu: AutoCompleteTextView?
+        val moFo = SimpleDateFormat("LLL yyyy", Locale.getDefault())
+        val priorMonthsVisual = arrayOf("","","")
+        val priorMonthsMath:Array<Calendar?> = Array(3) {null}
+        val targetMonthsVisual = arrayOf("","","")
+        val targetMonthsMath:Array<Calendar?> = Array(3) {null}
+        var fromMo = 2
+        var toMo = 0
+        for(i in (1..3)) {
+            val cal = Calendar.getInstance(TimeZone.GMT_ZONE) //now, in UTC terms
+            cal.add(Calendar.MONTH,-i)
+            priorMonthsMath[3-i]=cal
+            priorMonthsVisual[3-i]=moFo.format(cal)
+        }
+        for(i in (0..2)){
+            val cal = Calendar.getInstance(TimeZone.GMT_ZONE) //now, in UTC terms
+            cal.add(Calendar.MONTH,+i)
+            targetMonthsMath[i] = cal
+            targetMonthsVisual[i] = moFo.format(cal)
+
+        }
+        val mess = MaterialAlertDialogBuilder(requireContext()).setView(R.layout.month_range_dlg)
+            .setNeutralButton(resources.getString(R.string.lbl_cancel)) { _, _ ->
+                println("Nothing chosen")
+            }
+            .setPositiveButton(resources.getString(R.string.lbl_ok)) { _, _ ->
+
+                if(fromMo !=-1 && toMo !=-1) {
+                    println("From:"+moFo.format(priorMonthsMath[fromMo]))
+                    println("To:"+moFo.format(targetMonthsMath[toMo]))
+                }
+            }
             .show()
+
+        fromMenu = mess.findViewById<TextInputLayout>(R.id.from_list)?.editText as? AutoCompleteTextView
+        toMenu = mess.findViewById<TextInputLayout>(R.id.to_list)?.editText as? AutoCompleteTextView
+
+        fromMenu?.setAdapter(ArrayAdapter(requireContext(),android.R.layout.simple_dropdown_item_1line, priorMonthsVisual))
+        fromMenu?.setText(priorMonthsVisual[2],false)
+        fromMenu?.setOnItemClickListener { _: AdapterView<*>, _: View, i: Int, _: Long ->
+            fromMo = i
+        }
+        toMenu?.setAdapter(ArrayAdapter(requireContext(),android.R.layout.simple_dropdown_item_1line, targetMonthsVisual))
+        toMenu?.setText(targetMonthsVisual[0],false)
+        toMenu?.setOnItemClickListener { _: AdapterView<*>, _: View, i: Int, _: Long ->
+            toMo = i
+        }
     }
 
     private fun startMonthfilterDlg() {

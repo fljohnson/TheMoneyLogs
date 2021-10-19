@@ -27,4 +27,6 @@
     <string name="lbl_cancel">Cancel</string>
     <string name="lbl_choose_month">Which prior month is of interest?</string>
     <string name="lbl_ok">OK</string>
+    <string name="lbl_from">From:</string>
+    <string name="lbl_to">To:</string>
 </resources>
