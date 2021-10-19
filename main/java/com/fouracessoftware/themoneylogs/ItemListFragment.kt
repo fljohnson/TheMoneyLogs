@@ -120,11 +120,13 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
         for(i in (1..3)) {
             val cal = Calendar.getInstance(TimeZone.GMT_ZONE) //now, in UTC terms
             cal.add(Calendar.MONTH,-i)
+            cal.set(Calendar.DAY_OF_MONTH,1)
             priorMonthsMath[3-i]=cal
             priorMonthsVisual[3-i]=moFo.format(cal)
         }
         for(i in (0..2)){
             val cal = Calendar.getInstance(TimeZone.GMT_ZONE) //now, in UTC terms
+            cal.set(Calendar.DAY_OF_MONTH,1)
             cal.add(Calendar.MONTH,+i)
             targetMonthsMath[i] = cal
             targetMonthsVisual[i] = moFo.format(cal)
@@ -137,8 +139,10 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
             .setPositiveButton(resources.getString(R.string.lbl_ok)) { _, _ ->
 
                 if(fromMo !=-1 && toMo !=-1) {
-                    println("From:"+moFo.format(priorMonthsMath[fromMo]))
-                    println("To:"+moFo.format(targetMonthsMath[toMo]))
+
+                    model.copyTxns(priorMonthsMath[fromMo]!!,targetMonthsMath[toMo]!!)
+                    //model.txnList.observe(viewLifecycleOwner,this)
+                    setViewedMonth(targetMonthsMath[toMo])
                 }
             }
             .show()

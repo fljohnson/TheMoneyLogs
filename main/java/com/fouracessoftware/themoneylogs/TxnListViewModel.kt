@@ -68,7 +68,7 @@ class TxnListViewModel: ViewModel() {
     }
 
     fun getTxns(calendar: Calendar?) {
-        var start=Calendar.getInstance(TimeZone.GMT_ZONE)
+        val start=Calendar.getInstance(TimeZone.GMT_ZONE)
         val end=Calendar.getInstance(TimeZone.GMT_ZONE)
 
         if(calendar != null) {
@@ -83,9 +83,46 @@ class TxnListViewModel: ViewModel() {
         txnList = CentralContent.plannedTxnDao.getRangedTxnsWithCategory(start,end).asLiveData()
 
 
-        println(dateFormat.format(start))
-        println(dateFormat.format(end))
 
+    }
+
+    fun copyTxns(fromCal: Calendar, toCal: Calendar) {
+        val start = Calendar.getInstance(TimeZone.GMT_ZONE)
+        val end = Calendar.getInstance(TimeZone.GMT_ZONE)
+
+        start.time = fromCal.time
+        end.time =fromCal.time
+
+        start.set(Calendar.DAY_OF_MONTH,1)
+        end.add(Calendar.MONTH,1)
+        end.set(Calendar.DAY_OF_MONTH,0)
+
+        val delta = fromCal.fieldDifference(toCal.time,Calendar.MONTH)
+       /* println(dateFormat.format(start)+" to "+dateFormat.format(end))
+
+        println(dateFormat.format(toCal))
+        println(delta)*/
+
+        CoroutineScope(Dispatchers.IO).launch {
+
+            val oldList = CentralContent.plannedTxnDao.getNonliveRangedTxnsWithCategory(start,end)
+
+            val ddate = Calendar.getInstance()
+            for(t in oldList){
+                var finishedDate:Calendar? = null
+                if(t.txn.dateDue != null) {
+                    ddate.time = t.txn.dateDue!!.time
+                    ddate.add(Calendar.MONTH,delta)
+                    finishedDate = ddate
+                 //   println(dateFormat.format(finishedDate))
+                }
+                CentralContent.plannedTxnDao.insertTxnWithCategory(PlannedTxn(t.txn.amount,t.txn.payee,finishedDate,t.txn.categoryId),t.category!!)
+            }
+        }
+
+
+
+        //val listToMove
     }
 
     companion object {
