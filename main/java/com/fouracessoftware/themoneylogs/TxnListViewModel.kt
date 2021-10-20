@@ -125,6 +125,13 @@ class TxnListViewModel: ViewModel() {
         //val listToMove
     }
 
+    fun delete(item: TxnWithCategory) {
+        CoroutineScope(Dispatchers.IO).launch {
+            CentralContent.plannedTxnDao.deleteTxn(item.txn,item.actuals)
+
+        }
+    }
+
     companion object {
         private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     }

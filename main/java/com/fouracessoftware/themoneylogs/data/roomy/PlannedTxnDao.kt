@@ -36,5 +36,8 @@ interface PlannedTxnDao {
     @Update
     fun update(txn: PlannedTxn,category: Category)
 
+    @Transaction
+    @Delete
+    fun deleteTxn(toDrop: PlannedTxn, actuals: List<ActualTxn>)
 
 }

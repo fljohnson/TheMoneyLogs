@@ -1,8 +1,6 @@
 package com.fouracessoftware.themoneylogs
 
 import android.annotation.SuppressLint
-import android.content.ClipData
-import android.content.ClipDescription
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import android.icu.util.TimeZone
@@ -15,6 +13,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.findFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
@@ -333,21 +332,19 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
                 setOnContextClickListener(onContextClickListener)
 
                 setOnLongClickListener { v ->
-                    // Setting the item id as the clip data so that the drop target is able to
-                    // identify the id of the content
-                    val clipItem = ClipData.Item(item.txn.txnId.toString())
-                    val dragData = ClipData(
-                            v.tag as? CharSequence,
-                            arrayOf(ClipDescription.MIMETYPE_TEXT_PLAIN),
-                            clipItem
-                    )
 
-                    v.startDragAndDrop(
-                            dragData,
-                            View.DragShadowBuilder(v),
-                            null,
-                            0
-                    )
+                    MaterialAlertDialogBuilder(v.context).
+                        setTitle("Delete "+item.transactionTitle+"?")
+                        .setNeutralButton("Cancel") {_,_ ->
+
+                        }
+                        .setPositiveButton("OK"){_,_ ->
+                            findFragment<ItemListFragment>().model.delete(item)
+                        }
+                        .show()
+
+                    true
+
                 }
             }
         }

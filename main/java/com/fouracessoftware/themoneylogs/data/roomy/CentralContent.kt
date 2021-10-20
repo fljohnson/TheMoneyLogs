@@ -46,8 +46,10 @@ object CentralContent  {
             categoryDao.insertCategory(Category(name = "Life Insurance"))
             categoryDao.insertCategory(Category(name = "Debt", description = "non-revolving"))
             categoryDao.insertCategory(Category(name = "Bank Fees"))
-            categoryDao.insertCategory(Category(name = "Credit Card"))
+            categoryDao.insertCategory(Category(name = "Credit Card", description = "or other revolving-charge accounts"))
             categoryDao.insertCategory(Category(name = "Entertainment", openEnded = true,description = "food out, movies, events, museums"))
+
+            categoryDao.insertCategory(Category(name = "Health Insurance"))
             getCategories()
             categoriesReady = true
             sproing()
