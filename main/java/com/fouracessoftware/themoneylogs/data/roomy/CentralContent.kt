@@ -52,7 +52,8 @@ object CentralContent  {
             categoryDao.insertCategory(Category(name = "Health Insurance"))
             getCategories()
             categoriesReady = true
-            sproing()
+
+            //sproing()
 
 
         }
