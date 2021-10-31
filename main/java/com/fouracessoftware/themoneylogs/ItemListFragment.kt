@@ -76,10 +76,10 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View {
-        model.txnList.observe(viewLifecycleOwner,this)
+
         _binding = FragmentItemListBinding.inflate(inflater, container, false)
 
-
+        clearMonthFilter()
         binding.toolbar?.setOnMenuItemClickListener {
             when(it.itemId) {
                 R.id.action_copy -> {
@@ -316,11 +316,15 @@ class ItemListFragment : Fragment(), Observer<List<TxnWithCategory>> {
             val categoryName = item.category!!.name
 
             if(item.getOutstandingAmount() <0.01f) {
-                (item.amount.toString() + " for " + categoryName +  " PAID").also { holder.idView.text = it }
+                var toShow = item.amount
+                    if(item.category!!.openEnded||toShow!! < 0.01f) {
+                        toShow = toShow?.minus(item.getOutstandingAmount())
+                    }
+                (toShow.toString() + " for " + categoryName +  " PAID").also { holder.idView.text = it }
             }
             else {
 
-                (item.amount.toString() + " for " + categoryName +  " on " + item.dateDue()).also {
+                (item.amount.toString() + " for " + categoryName +  " due by " + item.dateDue()).also {
                     holder.idView.text = it
                 }
             }

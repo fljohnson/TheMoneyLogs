@@ -70,6 +70,7 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
                 if(txnID == -1L) {
                     //item = ProtoTxnWithCategory()
                     changeCounter = null
+                    updateContent()
                     return
 
                 }
@@ -77,12 +78,12 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
                 model.getTxn(txnID).observe(viewLifecycleOwner, {
                         selected_item -> item = selected_item
                        // changeCounter = (item as TxnWithCategory?)?.copy() //apparently a deep copy
-                    (item as TxnWithCategory)?.let {
+                    (item as TxnWithCategory).let { t ->
 
                         changeCounter = TxnWithCategory(
-                            it.txn.copy(),
-                            it.category,
-                            it.actuals
+                            t.txn.copy(),
+                            t.category,
+                            t.actuals
 
                         )
                     }
@@ -236,7 +237,18 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
                 it.category = adapteur.getItem(i)!!
                 it.categoryId = it.category!!.categoryId
             }
-                    //and finally
+            if(adapteur.getItem(i)!!.openEnded) {
+                var month = getCalendarForDate(binding.plannedDate!!.text)
+                if(month == null)
+                {
+                    month = getCalendarForDate(binding.actualDate!!.text)
+                }
+                model.getActualTxnsForCategory(adapteur.getItem(i)!!.categoryId,month).observe(viewLifecycleOwner,{
+                        actualsList -> actualTxns = actualsList
+                    updateContent()
+                })
+            }
+            //and finally
             updateContent()
         }
 
@@ -323,7 +335,7 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
                 reportError("Please enter a payee or payor")
                 return
             }
-            val dateDue = binding.plannedDate?.text?.let { getCalendarForDate(it) }
+            var dateDue = binding.plannedDate?.text?.let { getCalendarForDate(it) }
             val adapteur = (binding.categoryMenu!!.editText as AutoCompleteTextView).adapter as CategoryAdapter
 
             if(categoryIndex == -1)
@@ -332,15 +344,23 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
                 return
             }
 
+            val datePaid = getCalendarForDate(binding.actualDate?.text.toString())
             val category = adapteur.getItem(categoryIndex)!!
+
+            if (category.openEnded) {
+                if ((datePaid != null) && (dateDue == null)) {
+                    dateDue = getCalendarForDate(binding.actualDate?.text.toString())
+                }
+            }
+
             val txn = PlannedTxn(amount,payee,dateDue,category.categoryId)
             var actual:ActualTxn? = null
-            val datePaid = getCalendarForDate(binding.actualDate?.text.toString())
             if(datePaid != null) {
                 val amountPaid = binding.actualAmount?.text.toString()
                 if(amountPaid.isNotEmpty()) {
                     actual = ActualTxn(-1L,datePaid,amountPaid.toFloat())
                 }
+
             }
 
             var noteToSave: PlanNote? = null
@@ -431,11 +451,29 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
                 }
                 binding.plannedDate?.isEnabled = true
             }
-            binding.paidAmount?.text = getString(R.string.paid_so_far,getTotalPaid())
+
             binding.plannedAmount?.setText(toShow)
             binding.payee?.setText(it.payee)
 
             (binding.categoryMenu!!.editText as? AutoCompleteTextView)?.setText(it.category?.name,false)
+
+            var month = getCalendarForDate(binding.plannedDate!!.text)
+            if(month == null)
+            {
+                month = getCalendarForDate(binding.actualDate!!.text)
+            }
+            model.getActualTxnsForCategory(it.categoryId,month).observe(viewLifecycleOwner,{
+                    actualsList -> actualTxns = actualsList
+                updateContent()
+            })
+        }
+
+        val totalPaid = getTotalPaid()
+        if(totalPaid == 0f) {
+            binding.paidAmount?.text = ""
+        }
+        else {
+            binding.paidAmount?.text = getString(R.string.paid_so_far, getTotalPaid())
         }
         var toto=notes
         if(actualTxns != null) {

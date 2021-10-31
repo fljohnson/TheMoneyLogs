@@ -132,6 +132,21 @@ class TxnListViewModel: ViewModel() {
         }
     }
 
+    fun getActualTxnsForCategory(categoryId: Int,calendar: Calendar? ): LiveData<List<ActualTxn>> {
+        val start=Calendar.getInstance(TimeZone.GMT_ZONE)
+        val end=Calendar.getInstance(TimeZone.GMT_ZONE)
+
+        if(calendar != null) {
+            start.timeInMillis= calendar.timeInMillis
+            end.timeInMillis = calendar.timeInMillis
+        }
+
+        start.set(Calendar.DAY_OF_MONTH,1)
+        end.add(Calendar.MONTH,1)
+        end.set(Calendar.DAY_OF_MONTH,0)
+        return CentralContent.actualTxnDao.getActualsForCategory(categoryId,start,end).asLiveData()
+    }
+
     companion object {
         private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     }
