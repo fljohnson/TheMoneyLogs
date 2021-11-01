@@ -151,6 +151,7 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
             //the MaterialDatePicker apparently "thinks" in UTC (FLJ, 10/18/2021)
             val calendar = Calendar.getInstance(TimeZone.GMT_ZONE)
             calendar.timeInMillis =  it
+            TxnListViewModel.makeMidnight(calendar)
 
             //chosenDate = "${calendar.get(Calendar.YEAR)}-${1+calendar.get(Calendar.MONTH)}-${1+calendar.get(Calendar.DAY_OF_MONTH)}"
             if(isPlanning) {
@@ -177,6 +178,7 @@ class ItemDetailFragment : Fragment(), Observer<List<Category>> {
         //now here's a neat Kotlin construct: a try-catch block can be an expression
         return try {
             outdate.time = dateFormat.parse(textdate.toString())
+            //TxnListViewModel.makeMidnight(outdate)
             outdate
         } catch (ecch:Exception) {
             null

@@ -76,9 +76,11 @@ class TxnListViewModel: ViewModel() {
             end.timeInMillis = calendar.timeInMillis
         }
 
-        start.set(Calendar.DAY_OF_MONTH,1)
+        start.set(Calendar.DAY_OF_MONTH,0)
+        makeMidnight(start)
+        end.timeInMillis = start.timeInMillis
         end.add(Calendar.MONTH,1)
-        end.set(Calendar.DAY_OF_MONTH,0)
+
 
         txnList = CentralContent.plannedTxnDao.getRangedTxnsWithCategory(start,end).asLiveData()
 
@@ -90,12 +92,15 @@ class TxnListViewModel: ViewModel() {
         val start = Calendar.getInstance(TimeZone.GMT_ZONE)
         val end = Calendar.getInstance(TimeZone.GMT_ZONE)
 
+
         start.time = fromCal.time
         end.time =fromCal.time
 
-        start.set(Calendar.DAY_OF_MONTH,1)
-        end.add(Calendar.MONTH,1)
+        makeMidnight(start)
+        makeMidnight(end)
+        start.set(Calendar.DAY_OF_MONTH,0)
         end.set(Calendar.DAY_OF_MONTH,0)
+
 
         val delta = fromCal.fieldDifference(toCal.time,Calendar.MONTH)
        /* println(dateFormat.format(start)+" to "+dateFormat.format(end))
@@ -141,13 +146,23 @@ class TxnListViewModel: ViewModel() {
             end.timeInMillis = calendar.timeInMillis
         }
 
-        start.set(Calendar.DAY_OF_MONTH,1)
+        start.set(Calendar.DAY_OF_MONTH,0)
+        makeMidnight(start)
+        end.timeInMillis = start.timeInMillis
         end.add(Calendar.MONTH,1)
-        end.set(Calendar.DAY_OF_MONTH,0)
+
+
         return CentralContent.actualTxnDao.getActualsForCategory(categoryId,start,end).asLiveData()
     }
 
     companion object {
         private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+
+        fun makeMidnight(outdate:Calendar){
+            outdate.set(Calendar.HOUR,0)
+            outdate.set(Calendar.MINUTE,0)
+            outdate.set(Calendar.SECOND,0)
+            dateFormat.format(outdate)
+        }
     }
 }
