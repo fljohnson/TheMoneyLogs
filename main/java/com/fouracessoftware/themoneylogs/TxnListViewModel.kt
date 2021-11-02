@@ -78,8 +78,12 @@ class TxnListViewModel: ViewModel() {
 
         start.set(Calendar.DAY_OF_MONTH,0)
         makeMidnight(start)
-        end.timeInMillis = start.timeInMillis
+        end.set(Calendar.DAY_OF_MONTH,0)
         end.add(Calendar.MONTH,1)
+        makeMidnight(end)
+        start.add(Calendar.DAY_OF_MONTH,1)
+        println(dateFormat.format(start));
+        println(dateFormat.format(end));
 
 
         txnList = CentralContent.plannedTxnDao.getRangedTxnsWithCategory(start,end).asLiveData()
